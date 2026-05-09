@@ -58,7 +58,7 @@ Qadha Tracker — Tech Plan (PRD → Implementation Sequence)
 
  B. Local tooling (you, one-time install)
 
- 1. Supabase CLI: `npm i -g supabase` then `supabase login`.
+ 1. Supabase CLI: `npm i supabase --save-dev` then `supabase login`.
  2. Confirm Node ≥ 20.
  3. `supabase init` in repo root (creates `supabase/` folder if not present).
  4. `supabase link --project-ref <ref>` to bind local CLI to the project.
@@ -71,9 +71,18 @@ Qadha Tracker — Tech Plan (PRD → Implementation Sequence)
     primary. Lock before Step 4.
  3. Favicon (replace current `public/favicon.ico`).
 
+ C2. shadcn components (you, manual — run before Claude starts)
+
+ ```
+ npx shadcn@latest add card sheet dialog alert-dialog input label radio-group slider tabs skeleton sonner calendar popover select switch form separator dropdown-menu
+ ```
+
+ (`button` already installed.) 19 components total. Per-component mapping documented in Step 4.
+
  D. Local secrets file (you, after A)
 
  Create `.env.local` (gitignored):
+
  ```
  VITE_SUPABASE_URL=https://<ref>.supabase.co
  VITE_SUPABASE_ANON_KEY=<anon-key>
@@ -86,14 +95,13 @@ Qadha Tracker — Tech Plan (PRD → Implementation Sequence)
 
  F. What Claude scaffolds (NOT prereq — runs in Step 0–2)
 
- - `npm install` of all new deps (Supabase client, Drizzle, vite-plugin-pwa, i18next, etc.)
- - TanStack Query setup (already in deps — Claude wires `QueryClientProvider` in `app/root.tsx`)
- - Drizzle schema + config files
- - Supabase client singleton
- - i18next init
- - shadcn primitives via `npx shadcn add <component>` (you may need to run if Claude lacks permission)
+- `npm install` of all new deps (Supabase client, Drizzle, vite-plugin-pwa, i18next, etc.)
+- TanStack Query setup (already in deps — Claude wires `QueryClientProvider` in `app/root.tsx`)
+- Drizzle schema + config files
+- Supabase client singleton
+- i18next init
 
- Ready-to-execute gate: A.1, A.2, A.3, B, D done. Then Claude runs Step 0.
+ Ready-to-execute gate: A.1, A.2, A.3, B, C2, D done. Then Claude runs Step 0.
 
  ---
  Step 0 — Lock Foundations
@@ -181,9 +189,32 @@ Qadha Tracker — Tech Plan (PRD → Implementation Sequence)
  ---
  Step 4 — Design System Primitives
 
- Use existing shadcn + base-ui. Add only what PRD screens need:
+ Use existing shadcn + base-ui. Components installed in pre-exec checklist C2. Component-by-screen mapping:
 
-- app/components/ui/{button,card,sheet,dialog,input,label,radio-group,slider,tabs,toast,skeleton}.tsx
+ | Component | Where used |
+ |---|---|
+ | button | everywhere |
+ | card | PrayerCard, FastingCard, phase cards, review totals |
+ | sheet | log overflow (quantity picker), mobile menus |
+ | dialog | specific-day fasting date picker, generic modals |
+ | alert-dialog | destructive confirms (delete entry, delete account, regen baseline) |
+ | input | birth year, display name, custom days, email (sign-in) |
+ | label | all form fields (a11y) |
+ | radio-group | gender, baligh branch, fasting pattern presets |
+ | slider | inconsistent missed_pct (1–99%) in prayer phases |
+ | tabs | history filter (All/Prayer/Fasting) + sub-filter |
+ | skeleton | loading remaining counts, history list |
+ | sonner | toast notifications (rollback on optimistic-update error) |
+ | calendar | specific-day fasting date picker |
+ | popover | wraps calendar trigger, dropdown anchors |
+ | select | locale, timezone, madhab, school grade (baligh), pattern picker |
+ | switch | intent stacking toggle (settings, v2 disabled state) |
+ | form | RHF + Zod wrapper for all forms |
+ | separator | layout dividers (settings sections, dashboard) |
+ | dropdown-menu | card overflow menus (log multiple, edit phase) |
+
+ Skipped (overkill / against perf budget): data-table, command, accordion, carousel, hover-card, menubar, navigation-menu, breadcrumb, pagination (we use infinite scroll), context-menu, collapsible, toggle-group, table.
+
 - Color tokens in app/app.css — calm primary (forest green / muted teal), neutrals, one positive accent. CSS vars +
  prefers-color-scheme for dark mode (PRD §14).
 - Touch targets ≥44px. 360px baseline.
