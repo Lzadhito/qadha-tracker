@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { supabase } from "~/lib/supabase"
 
@@ -56,7 +56,33 @@ export function useHistory(
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === PAGE_SIZE ? allPages.length : undefined,
+      lastPage.length >= PAGE_SIZE ? allPages.length : undefined,
+  })
+}
+
+export function useHistoryEntry(id: string, obligation: "prayer" | "fasting") {
+  return useQuery({
+    queryKey: ["history-entry", obligation, id],
+    enabled: !!id,
+    queryFn: async () => {
+      if (obligation === "prayer") {
+        const { data, error } = await supabase
+          .from("prayer_ledger")
+          .select("id, prayer, entry_type, amount, logged_at")
+          .eq("id", id)
+          .single()
+        if (error) throw error
+        return { ...data, obligation: "prayer" as const }
+      } else {
+        const { data, error } = await supabase
+          .from("fasting_ledger")
+          .select("id, entry_type, amount, fasted_on, logged_at")
+          .eq("id", id)
+          .single()
+        if (error) throw error
+        return { ...data, obligation: "fasting" as const }
+      }
+    },
   })
 }
 

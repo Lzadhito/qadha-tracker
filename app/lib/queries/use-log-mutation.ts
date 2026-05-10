@@ -4,13 +4,6 @@ import { supabase } from "~/lib/supabase"
 import { PRAYERS } from "./use-remaining"
 import type { Prayer } from "./use-remaining"
 
-interface PrayerLogPayload {
-  prayer: Prayer
-  entryType: "qadha" | "miss"
-  amount: number
-  loggedAt?: string
-}
-
 interface FastingLogPayload {
   entryType: "qadha" | "miss"
   amount: number
@@ -22,22 +15,25 @@ export function usePrayerLog() {
   const qc = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ prayer, entryType, amount, loggedAt }: PrayerLogPayload) => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+    mutationFn: async ({ prayer, loggedDates }: { prayer: Prayer; loggedDates?: string[] }) => {
+      const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error("Not authenticated")
 
-      const { error } = await supabase.from("prayer_ledger").insert({
-        user_id: session.user.id,
-        prayer,
-        entry_type: entryType,
-        amount: entryType === "qadha" ? -Math.abs(amount) : Math.abs(amount),
-        ...(loggedAt ? { logged_at: loggedAt } : {}),
-      })
+      const rows = loggedDates
+        ? loggedDates.map((loggedAt) => ({
+            user_id: session.user.id,
+            prayer,
+            entry_type: "qadha" as const,
+            amount: -1,
+            logged_at: loggedAt,
+          }))
+        : [{ user_id: session.user.id, prayer, entry_type: "qadha" as const, amount: -1 }]
+
+      const { error } = await supabase.from("prayer_ledger").insert(rows)
       if (error) throw error
     },
-    onMutate: async ({ prayer, entryType, amount }) => {
+    onMutate: async ({ prayer, loggedDates }) => {
+      const numDays = loggedDates?.length ?? 1
       await qc.cancelQueries({ queryKey: ["prayer-remaining"] })
       const previous = qc.getQueryData(["prayer-remaining"])
 
@@ -46,13 +42,8 @@ export function usePrayerLog() {
           r.prayer === prayer
             ? {
                 ...r,
-                remaining:
-                  r.remaining +
-                  (entryType === "qadha" ? -amount : amount),
-                displayRemaining: Math.max(
-                  0,
-                  r.remaining + (entryType === "qadha" ? -amount : amount)
-                ),
+                remaining: r.remaining - numDays,
+                displayRemaining: Math.max(0, r.remaining - numDays),
               }
             : r
         )
@@ -60,13 +51,12 @@ export function usePrayerLog() {
       return { previous }
     },
     onError: (_err, _vars, context) => {
-      if (context?.previous) {
-        qc.setQueryData(["prayer-remaining"], context.previous)
-      }
+      if (context?.previous) qc.setQueryData(["prayer-remaining"], context.previous)
       toast.error("Failed to log. Try again.")
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["prayer-remaining"] })
+      qc.invalidateQueries({ queryKey: ["prayer-today"] })
     },
   })
 }
@@ -185,12 +175,30 @@ export function usePrayerAdjust() {
       const { error } = await supabase.from("prayer_ledger").insert(rows)
       if (error) throw error
     },
+    onMutate: async ({ adjustments }) => {
+      await qc.cancelQueries({ queryKey: ["prayer-remaining"] })
+      const previous = qc.getQueryData(["prayer-remaining"])
+      qc.setQueryData(["prayer-remaining"], (old: any[]) =>
+        old?.map((r) => {
+          const adj = adjustments.find((a) => a.prayer === r.prayer)
+          if (!adj || adj.delta === 0) return r
+          const newRemaining = r.remaining + adj.delta
+          return { ...r, remaining: newRemaining, displayRemaining: Math.max(0, newRemaining) }
+        })
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(["prayer-remaining"], ctx.previous)
+      toast.error("Failed to adjust.")
+    },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["prayer-remaining"] })
       qc.invalidateQueries({ queryKey: ["history"] })
       toast.success("Remaining adjusted.")
     },
-    onError: () => toast.error("Failed to adjust."),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["prayer-remaining"] })
+    },
   })
 }
 
@@ -208,11 +216,24 @@ export function useFastingAdjust() {
       })
       if (error) throw error
     },
+    onMutate: async ({ delta }) => {
+      await qc.cancelQueries({ queryKey: ["fasting-remaining"] })
+      const previous = qc.getQueryData(["fasting-remaining"])
+      qc.setQueryData(["fasting-remaining"], (old: any) =>
+        old ? { ...old, remaining: old.remaining + delta, displayRemaining: Math.max(0, old.remaining + delta) } : old
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(["fasting-remaining"], ctx.previous)
+      toast.error("Failed to adjust.")
+    },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["fasting-remaining"] })
       qc.invalidateQueries({ queryKey: ["history"] })
       toast.success("Remaining adjusted.")
     },
-    onError: () => toast.error("Failed to adjust."),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["fasting-remaining"] })
+    },
   })
 }

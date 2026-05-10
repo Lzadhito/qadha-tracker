@@ -1,8 +1,8 @@
 import { useState } from "react"
-import { format } from "date-fns"
+import { format, eachDayOfInterval } from "date-fns"
+import type { DateRange } from "react-day-picker"
+import { CheckCircle2 } from "lucide-react"
 import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
 import { Calendar } from "~/components/ui/calendar"
 import { usePrayerLog } from "~/lib/queries/use-log-mutation"
@@ -16,109 +16,108 @@ const PRAYER_LABELS: Record<Prayer, string> = {
   isya: "Isya",
 }
 
-function nowTimeStr() {
-  const n = new Date()
-  return `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`
-}
-
 interface PrayerCardProps {
   prayer: Prayer
   remaining: number
+  loggedToday: boolean
 }
 
-export function PrayerCard({ prayer, remaining }: PrayerCardProps) {
+export function PrayerCard({ prayer, remaining, loggedToday }: PrayerCardProps) {
   const [open, setOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>()
-  const [selectedTime, setSelectedTime] = useState("12:00")
+  const [range, setRange] = useState<DateRange | undefined>()
   const log = usePrayerLog()
 
-  const handleSelectDate = (d: Date | undefined) => {
-    setSelectedDate(d)
-    if (d) setSelectedTime(nowTimeStr())
-  }
+  const days = range?.from
+    ? eachDayOfInterval({ start: range.from, end: range.to ?? range.from })
+    : []
 
-  const logQadha = (date?: Date, time?: string) => {
-    let loggedAt: string | undefined
-    if (date) {
-      const [h, m] = (time ?? "12:00").split(":").map(Number)
-      const d = new Date(date)
-      d.setHours(h, m, 0, 0)
-      loggedAt = d.toISOString()
+  const logQadha = (dates?: DateRange) => {
+    let loggedDates: string[] | undefined
+    if (dates?.from) {
+      const dayList = eachDayOfInterval({ start: dates.from, end: dates.to ?? dates.from })
+      loggedDates = dayList.map((d) => {
+        const local = new Date(d)
+        local.setHours(12, 0, 0, 0)
+        return local.toISOString()
+      })
     }
-    log.mutate({ prayer, entryType: "qadha", amount: 1, loggedAt })
-    setOpen(false)
-    setSelectedDate(undefined)
-    setSelectedTime("12:00")
+    log.mutate({ prayer, loggedDates }, {
+      onSuccess: () => {
+        setOpen(false)
+        setRange(undefined)
+      },
+    })
   }
 
-  if (remaining <= 0) {
-    return (
-      <div className="flex items-center justify-between py-3 px-1 border-b border-border/40 last:border-0">
-        <span className="font-medium text-sm">{PRAYER_LABELS[prayer]}</span>
-        <span className="text-primary text-sm">Done 🌙</span>
-      </div>
-    )
+  const rangeLabel = () => {
+    if (!range?.from) return "Select date(s) above"
+    if (!range.to || format(range.from, "yyyy-MM-dd") === format(range.to, "yyyy-MM-dd")) {
+      return `Log for ${format(range.from, "d MMM yyyy")}`
+    }
+    return `Log ${format(range.from, "d MMM")} – ${format(range.to, "d MMM yyyy")} (${days.length} days)`
   }
 
   return (
     <div className="flex items-center justify-between py-3 px-1 border-b border-border/40 last:border-0">
       <div className="min-w-0 flex-1">
         <p className="font-medium text-sm">{PRAYER_LABELS[prayer]}</p>
-        <p className="text-muted-foreground text-xs">{remaining.toLocaleString()} remaining</p>
+        <p className="text-muted-foreground text-xs">
+          {remaining > 0 ? `${remaining.toLocaleString()} remaining` : "All paid off"}
+        </p>
       </div>
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <Button
-          size="sm"
-          disabled={log.isPending}
-          className="h-9 min-w-[90px] flex-shrink-0"
-          onClick={() => setOpen(true)}
-        >
-          +1 Qadha
-        </Button>
-        <SheetContent side="bottom">
-          <SheetHeader>
-            <SheetTitle>When did you qadha {PRAYER_LABELS[prayer]}?</SheetTitle>
-          </SheetHeader>
-          <div className="py-4 space-y-3 px-4">
-            <Button className="w-full" onClick={() => logQadha()}>
-              Right now
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="flex-1 border-t border-border" />
-              <span className="text-xs text-muted-foreground">or choose date & time</span>
-              <div className="flex-1 border-t border-border" />
-            </div>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={handleSelectDate}
-              disabled={(d) => d > new Date()}
-              className="mx-auto"
-            />
-            {selectedDate && (
-              <div className="space-y-1">
-                <Label className="text-xs">Time</Label>
-                <Input
-                  type="time"
-                  value={selectedTime}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                />
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {loggedToday && (
+          <span className="flex items-center gap-1 text-xs text-primary font-medium">
+            <CheckCircle2 className="h-4 w-4" />
+            Today
+          </span>
+        )}
+        <Sheet open={open} onOpenChange={setOpen}>
+          <Button
+            size="sm"
+            variant={remaining <= 0 ? "outline" : "default"}
+            disabled={log.isPending}
+            className="h-9 min-w-[80px]"
+            onClick={() => setOpen(true)}
+          >
+            +Qadha
+          </Button>
+          <SheetContent side="bottom">
+            <SheetHeader>
+              <SheetTitle>When did you qadha {PRAYER_LABELS[prayer]}?</SheetTitle>
+            </SheetHeader>
+            <div className="py-4 space-y-3 px-4">
+              <p className="text-xs text-muted-foreground">
+                Select a single day or drag to pick a range.
+              </p>
+              <Button className="w-full" onClick={() => logQadha()} disabled={log.isPending}>
+                Right now
+              </Button>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 border-t border-border" />
+                <span className="text-xs text-muted-foreground">or choose date(s)</span>
+                <div className="flex-1 border-t border-border" />
               </div>
-            )}
-            <Button
-              variant="outline"
-              className="w-full"
-              disabled={!selectedDate || log.isPending}
-              onClick={() => selectedDate && logQadha(selectedDate, selectedTime)}
-            >
-              {selectedDate
-                ? `Log for ${format(selectedDate, "d MMM yyyy")} at ${selectedTime}`
-                : "Select a date above"}
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={setRange}
+                disabled={(d) => d > new Date()}
+                className="mx-auto"
+              />
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={!range?.from || log.isPending}
+                onClick={() => range?.from && logQadha(range)}
+              >
+                {rangeLabel()}
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
     </div>
   )
 }

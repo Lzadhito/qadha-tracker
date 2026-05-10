@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { requireOnboarded } from "~/lib/guards"
-import { PRAYERS, usePrayerRemaining, useFastingRemaining } from "~/lib/queries/use-remaining"
+import { PRAYERS, usePrayerRemaining, useFastingRemaining, useTodayPrayerLog } from "~/lib/queries/use-remaining"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { FullDaySheet } from "~/components/prayer/FullDaySheet"
@@ -13,24 +13,36 @@ export async function clientLoader() {
   return requireOnboarded()
 }
 
-function formatDaysLeft(days: number): string | null {
+function formatPrayerLeft(days: number): string | null {
   if (days <= 0) return null
-  if (days >= 365) return `~${Math.round(days / 365)} years`
-  if (days >= 30) return `~${Math.round(days / 30)} months`
-  return `~${days} days`
+  const years = Math.floor(days / 365)
+  const afterYears = days - years * 365
+  const months = Math.floor(afterYears / 30)
+  const d = afterYears - months * 30
+  const parts: string[] = []
+  if (years > 0) parts.push(`${years} year${years > 1 ? "s" : ""}`)
+  if (months > 0) parts.push(`${months} month${months > 1 ? "s" : ""}`)
+  if (d > 0 || parts.length === 0) parts.push(`${d} day${d !== 1 ? "s" : ""}`)
+  return parts.join(" ")
+}
+
+function formatFastingLeft(days: number): string | null {
+  if (days <= 0) return null
+  return `${days.toLocaleString()} day${days !== 1 ? "s" : ""}`
 }
 
 export default function Log() {
   const prayers = usePrayerRemaining()
   const fasting = useFastingRemaining()
+  const todayLog = useTodayPrayerLog()
   const [fullDayOpen, setFullDayOpen] = useState(false)
   const [adjustOpen, setAdjustOpen] = useState(false)
 
-  const prayerRemaining = prayers.data?.reduce((s, r) => s + r.displayRemaining, 0) ?? 0
+  const prayerRemaining = prayers.data?.reduce((s, r) => s + r.remaining, 0) ?? 0
   const fastingRemaining = fasting.data?.displayRemaining ?? 0
   const loaded = !prayers.isLoading && !fasting.isLoading
-  const prayerSummary = loaded ? formatDaysLeft(Math.ceil(prayerRemaining / 5)) : null
-  const fastingSummary = loaded ? formatDaysLeft(fastingRemaining) : null
+  const prayerSummary = loaded ? formatPrayerLeft(Math.ceil(prayerRemaining / 5)) : null
+  const fastingSummary = loaded ? formatFastingLeft(fastingRemaining) : null
 
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -84,6 +96,7 @@ export default function Log() {
                 key={r.prayer}
                 prayer={r.prayer}
                 remaining={r.displayRemaining}
+                loggedToday={todayLog.data?.has(r.prayer) ?? false}
               />
             ))}
       </div>
