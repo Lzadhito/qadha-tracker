@@ -1,16 +1,10 @@
 import { useState } from "react"
-import { format } from "date-fns"
+import { format, eachDayOfInterval } from "date-fns"
+import type { DateRange } from "react-day-picker"
 import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
 import { Calendar } from "~/components/ui/calendar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
 import { usePrayerFullDayLog } from "~/lib/queries/use-log-mutation"
-
-function nowTimeStr() {
-  const n = new Date()
-  return `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`
-}
 
 interface FullDaySheetProps {
   open: boolean
@@ -18,25 +12,37 @@ interface FullDaySheetProps {
 }
 
 export function FullDaySheet({ open, onOpenChange }: FullDaySheetProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>()
-  const [selectedTime, setSelectedTime] = useState("12:00")
+  const [range, setRange] = useState<DateRange | undefined>()
   const log = usePrayerFullDayLog()
 
-  const logFullDay = (date?: Date, time?: string) => {
-    let loggedAt: string | undefined
-    if (date) {
-      const [h, m] = (time ?? "12:00").split(":").map(Number)
-      const d = new Date(date)
-      d.setHours(h, m, 0, 0)
-      loggedAt = d.toISOString()
+  const days = range?.from
+    ? eachDayOfInterval({ start: range.from, end: range.to ?? range.from })
+    : []
+
+  const logDays = (dates?: DateRange) => {
+    let loggedDates: string[] | undefined
+    if (dates?.from) {
+      const dayList = eachDayOfInterval({ start: dates.from, end: dates.to ?? dates.from })
+      loggedDates = dayList.map((d) => {
+        const local = new Date(d)
+        local.setHours(12, 0, 0, 0)
+        return local.toISOString()
+      })
     }
-    log.mutate({ loggedAt }, {
+    log.mutate({ loggedDates }, {
       onSuccess: () => {
         onOpenChange(false)
-        setSelectedDate(undefined)
-        setSelectedTime("12:00")
+        setRange(undefined)
       },
     })
+  }
+
+  const rangeLabel = () => {
+    if (!range?.from) return "Select date(s) above"
+    if (!range.to || format(range.from, "yyyy-MM-dd") === format(range.to, "yyyy-MM-dd")) {
+      return `Log for ${format(range.from, "d MMM yyyy")}`
+    }
+    return `Log ${format(range.from, "d MMM")} – ${format(range.to, "d MMM yyyy")} (${days.length} days)`
   }
 
   return (
@@ -47,42 +53,30 @@ export function FullDaySheet({ open, onOpenChange }: FullDaySheetProps) {
         </SheetHeader>
         <div className="py-4 space-y-3 px-4">
           <p className="text-xs text-muted-foreground">
-            Logs 1 qadha for Fajr, Dzuhr, Ashr, Maghrib, and Isha at once.
+            Logs 1 qadha for Fajr, Dzuhr, Ashr, Maghrib, and Isha for each selected day.
           </p>
-          <Button className="w-full" onClick={() => logFullDay()} disabled={log.isPending}>
-            Right now
+          <Button className="w-full" onClick={() => logDays()} disabled={log.isPending}>
+            Today (right now)
           </Button>
           <div className="flex items-center gap-3">
             <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground">or choose date & time</span>
+            <span className="text-xs text-muted-foreground">or choose date(s)</span>
             <div className="flex-1 border-t border-border" />
           </div>
           <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={(d) => { setSelectedDate(d); if (d) setSelectedTime(nowTimeStr()) }}
+            mode="range"
+            selected={range}
+            onSelect={setRange}
             disabled={(d) => d > new Date()}
             className="mx-auto"
           />
-          {selectedDate && (
-            <div className="space-y-1">
-              <Label className="text-xs">Time</Label>
-              <Input
-                type="time"
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-              />
-            </div>
-          )}
           <Button
             variant="outline"
             className="w-full"
-            disabled={!selectedDate || log.isPending}
-            onClick={() => selectedDate && logFullDay(selectedDate, selectedTime)}
+            disabled={!range?.from || log.isPending}
+            onClick={() => range?.from && logDays(range)}
           >
-            {selectedDate
-              ? `Log for ${format(selectedDate, "d MMM yyyy")} at ${selectedTime}`
-              : "Select a date above"}
+            {rangeLabel()}
           </Button>
         </div>
       </SheetContent>

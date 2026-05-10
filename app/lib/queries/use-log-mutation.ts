@@ -124,27 +124,37 @@ export function useFastingLog() {
 export function usePrayerFullDayLog() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async ({ loggedAt }: { loggedAt?: string }) => {
+    mutationFn: async ({ loggedDates }: { loggedDates?: string[] }) => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error("Not authenticated")
-      const rows = PRAYERS.map((prayer) => ({
-        user_id: session.user.id,
-        prayer,
-        entry_type: "qadha" as const,
-        amount: -1,
-        ...(loggedAt ? { logged_at: loggedAt } : {}),
-      }))
+      const rows = loggedDates
+        ? loggedDates.flatMap((loggedAt) =>
+            PRAYERS.map((prayer) => ({
+              user_id: session.user.id,
+              prayer,
+              entry_type: "qadha" as const,
+              amount: -1,
+              logged_at: loggedAt,
+            }))
+          )
+        : PRAYERS.map((prayer) => ({
+            user_id: session.user.id,
+            prayer,
+            entry_type: "qadha" as const,
+            amount: -1,
+          }))
       const { error } = await supabase.from("prayer_ledger").insert(rows)
       if (error) throw error
     },
-    onMutate: async () => {
+    onMutate: async ({ loggedDates }) => {
+      const numDays = loggedDates?.length ?? 1
       await qc.cancelQueries({ queryKey: ["prayer-remaining"] })
       const previous = qc.getQueryData(["prayer-remaining"])
       qc.setQueryData(["prayer-remaining"], (old: any[]) =>
         old?.map((r) => ({
           ...r,
-          remaining: r.remaining - 1,
-          displayRemaining: Math.max(0, r.remaining - 1),
+          remaining: r.remaining - numDays,
+          displayRemaining: Math.max(0, r.remaining - numDays),
         }))
       )
       return { previous }
