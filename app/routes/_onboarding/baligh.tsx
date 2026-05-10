@@ -5,14 +5,6 @@ import { Label } from "~/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group"
 import { Card } from "~/components/ui/card"
 import { Input } from "~/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-
-// School grade → approximate age at that grade level
-const GRADE_OPTIONS = [
-  { label: "SD (Elementary, ~age 7–12)", age: 7 },
-  { label: "SMP (Middle school, ~age 13–15)", age: 13 },
-  { label: "SMA (High school, ~age 16–18)", age: 16 },
-]
 
 function getOnboardingData() {
   return JSON.parse(sessionStorage.getItem("onboarding") || "{}")
@@ -21,19 +13,22 @@ function getOnboardingData() {
 export default function Baligh() {
   const navigate = useNavigate()
   const data = getOnboardingData()
+  const birthYear: number = data.birthYear ?? new Date().getFullYear() - 25
 
   const [branch, setBranch] = useState<"remember" | "estimate" | "unknown">("remember")
   const [balighAge, setBalighAge] = useState("15")
-  const [gradeAge, setGradeAge] = useState<number>(13)
+  const [balighYear, setBalighYear] = useState(String(birthYear + 15))
   const [firstPeriodAge, setFirstPeriodAge] = useState("")
+
+  const estimatedAge = data.gender === "female" && firstPeriodAge
+    ? Number(firstPeriodAge)
+    : Math.max(0, Number(balighYear) - birthYear)
 
   const resolvedAge =
     branch === "remember"
       ? Number(balighAge)
       : branch === "estimate"
-        ? data.gender === "female" && firstPeriodAge
-          ? Number(firstPeriodAge)
-          : gradeAge
+        ? estimatedAge
         : 15
 
   const handleNext = () => {
@@ -90,27 +85,20 @@ export default function Baligh() {
             {branch === "estimate" && (
               <div className="ml-6 space-y-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">What school level were you when it happened?</Label>
-                  <Select
-                    value={String(gradeAge)}
-                    onValueChange={(v) => setGradeAge(Number(v))}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GRADE_OPTIONS.map((g) => (
-                        <SelectItem key={g.age} value={String(g.age)}>
-                          {g.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-xs">Year you became baligh</Label>
+                  <Input
+                    type="number"
+                    min={birthYear + 7}
+                    max={new Date().getFullYear()}
+                    value={balighYear}
+                    onChange={(e) => setBalighYear(e.target.value)}
+                    className="w-28"
+                  />
                 </div>
                 {data.gender === "female" && (
                   <div className="space-y-1">
                     <Label className="text-xs">
-                      Age at first period (optional — overrides grade estimate)
+                      Age at first period (optional — overrides year)
                     </Label>
                     <Input
                       type="number"
@@ -124,7 +112,7 @@ export default function Baligh() {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Estimated age: <strong>{resolvedAge}</strong>
+                  Estimated age: <strong>{estimatedAge}</strong>
                 </p>
               </div>
             )}
