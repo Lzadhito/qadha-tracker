@@ -1,0 +1,99 @@
+{
+  "auth": {
+    "title": "Qadha Tracker",
+    "subtitle": "Catat perjalanan qadha-mu",
+    "email": "Email",
+    "sendMagicLink": "Kirim magic link",
+    "continueGoogle": "Lanjut dengan Google",
+    "checkEmail": "Cek email kamu untuk link masuk.",
+    "privacy": "Dengan melanjutkan, kamu menyetujui kebijakan privasi kami.",
+    "signingIn": "Sedang masuk..."
+  },
+  "log": {
+    "title": "Catatan Harian",
+    "remaining": "{{count}} tersisa",
+    "qadha": "+1 Qadha",
+    "miss": "Lewat",
+    "done": "Selesai 🌙",
+    "fasting": "Puasa",
+    "fastingDays": "{{count}} hari tersisa",
+    "logFast": "Catat 1 Puasa",
+    "logSpecificDay": "Catat hari tertentu...",
+    "logMissForDate": "Catat lewat untuk {{date}}",
+    "selectDate": "Pilih tanggal"
+  },
+  "history": {
+    "title": "Riwayat",
+    "all": "Semua",
+    "prayer": "Shalat",
+    "fasting": "Puasa",
+    "qadha": "Qadha",
+    "miss": "Lewat",
+    "baseline": "Awal",
+    "adjustment": "Koreksi",
+    "deleteEntry": "Hapus entri",
+    "deleteConfirm": "Hapus entri ini?",
+    "deleteDescription": "Jumlah tersisa akan menyesuaikan. Tidak bisa dibatalkan.",
+    "cancel": "Batal",
+    "delete": "Hapus"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "myPhases": "Fase Saya",
+    "dataPrivacy": "Data & Privasi",
+    "about": "Tentang",
+    "signOut": "Keluar"
+  },
+  "data": {
+    "howWeHandle": "Cara kami menangani datamu",
+    "description1": "Kami menyimpan jumlah shalat dan puasa yang masih kamu hutang, tanggal kamu mencatat, dan profil dasarmu. Tidak lebih.",
+    "description2": "Kami tidak bertanya kenapa shalat atau puasa terlewat. Tidak ada catatan. Tidak ada pelacakan. Itu urusanmu dengan Allah.",
+    "description3": "Data kamu terenkripsi dan hanya kamu yang bisa membacanya. Kamu bisa mengekspor atau menghapus akun kapan saja.",
+    "export": "Ekspor semua data (JSON)",
+    "exporting": "Mengekspor...",
+    "deleteAccount": "Hapus akun & semua data",
+    "deleteConfirm": "Hapus akun?",
+    "deleteDescription": "Ini menghapus akun dan semua data — shalat, puasa, fase, profil. Tidak bisa dibatalkan.",
+    "deleteEverything": "Hapus semuanya",
+    "deleting": "Menghapus..."
+  },
+  "about": {
+    "title": "Tentang",
+    "version": "Qadha Tracker v0.1.0",
+    "disclaimer": "Bukan otoritas fiqh. Konsultasikan dengan ustadz atau ulamamu."
+  },
+  "prayers": {
+    "subuh": "Subuh",
+    "zuhur": "Zuhur",
+    "asar": "Asar",
+    "maghrib": "Maghrib",
+    "isya": "Isya"
+  },
+  "onboarding": {
+    "basics": {
+      "title": "Informasi Dasar",
+      "subtitle": "Mulai dari yang dasar",
+      "birthYear": "Tahun Lahir",
+      "gender": "Jenis Kelamin",
+      "male": "Laki-laki",
+      "female": "Perempuan",
+      "next": "Selanjutnya"
+    },
+    "baligh": {
+      "title": "Usia Baligh",
+      "subtitle": "Kapan kamu baligh?",
+      "remember": "Saya ingat tahunnya",
+      "estimate": "Bantu saya menghitungnya",
+      "unknown": "Saya tidak tahu (default: usia 15)",
+      "next": "Selanjutnya",
+      "back": "Kembali"
+    },
+    "review": {
+      "title": "Ringkasan",
+      "subtitle": "Konfirmasi untuk melanjutkan",
+      "start": "Mulai",
+      "back": "Kembali",
+      "submitting": "Menyimpan..."
+    }
+  }
+}

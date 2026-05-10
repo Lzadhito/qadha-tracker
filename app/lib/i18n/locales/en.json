@@ -1,0 +1,99 @@
+{
+  "auth": {
+    "title": "Qadha Tracker",
+    "subtitle": "Track your qadha journey",
+    "email": "Email",
+    "sendMagicLink": "Send magic link",
+    "continueGoogle": "Continue with Google",
+    "checkEmail": "Check your email for a sign-in link.",
+    "privacy": "By continuing, you agree to our privacy policy.",
+    "signingIn": "Signing in..."
+  },
+  "log": {
+    "title": "Daily Log",
+    "remaining": "{{count}} remaining",
+    "qadha": "+1 Qadha",
+    "miss": "Miss",
+    "done": "Done 🌙",
+    "fasting": "Fasting",
+    "fastingDays": "{{count}} days remaining",
+    "logFast": "Log 1 Fast",
+    "logSpecificDay": "Log specific day...",
+    "logMissForDate": "Log miss for {{date}}",
+    "selectDate": "Select a date"
+  },
+  "history": {
+    "title": "History",
+    "all": "All",
+    "prayer": "Prayer",
+    "fasting": "Fasting",
+    "qadha": "Qadha",
+    "miss": "Miss",
+    "baseline": "Baseline",
+    "adjustment": "Adjustment",
+    "deleteEntry": "Delete entry",
+    "deleteConfirm": "Delete this entry?",
+    "deleteDescription": "Your remaining count will adjust accordingly. This cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "settings": {
+    "title": "Settings",
+    "myPhases": "My Phases",
+    "dataPrivacy": "Data & Privacy",
+    "about": "About",
+    "signOut": "Sign out"
+  },
+  "data": {
+    "howWeHandle": "How we handle your data",
+    "description1": "We store the count of prayers and fasts you owe, the dates you logged actions, and your basic profile. Nothing else.",
+    "description2": "We do not ask why a prayer or fast was missed. We do not store notes. We do not track patterns. That is between you and Allah.",
+    "description3": "Your data is encrypted at rest and only you can read it. You can export it or delete your account at any time.",
+    "export": "Export all data (JSON)",
+    "exporting": "Exporting...",
+    "deleteAccount": "Delete account & all data",
+    "deleteConfirm": "Delete account?",
+    "deleteDescription": "This permanently deletes your account and all data — prayers, fasts, phases, profile. This cannot be undone.",
+    "deleteEverything": "Delete everything",
+    "deleting": "Deleting..."
+  },
+  "about": {
+    "title": "About",
+    "version": "Qadha Tracker v0.1.0",
+    "disclaimer": "Not a fiqh authority. Consult your own scholar for rulings."
+  },
+  "prayers": {
+    "subuh": "Subuh",
+    "zuhur": "Zuhur",
+    "asar": "Asar",
+    "maghrib": "Maghrib",
+    "isya": "Isya"
+  },
+  "onboarding": {
+    "basics": {
+      "title": "Basic Information",
+      "subtitle": "Let's start with the basics",
+      "birthYear": "Birth Year",
+      "gender": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "next": "Next"
+    },
+    "baligh": {
+      "title": "Age of Religious Responsibility",
+      "subtitle": "When did you reach baligh?",
+      "remember": "I remember the year",
+      "estimate": "Help me figure it out",
+      "unknown": "I don't know (default: age 15)",
+      "next": "Next",
+      "back": "Back"
+    },
+    "review": {
+      "title": "Review",
+      "subtitle": "Confirm to continue",
+      "start": "Start",
+      "back": "Back",
+      "submitting": "Submitting..."
+    }
+  }
+}

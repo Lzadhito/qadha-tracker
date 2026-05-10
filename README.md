@@ -1,21 +1,64 @@
-# React Router + shadcn/ui
+# Qadha Tracker
 
-This is a template for a new React Router project with React, TypeScript, and shadcn/ui.
+Privacy-first PWA for Muslims tracking qadha (missed prayers + fasts). Mobile-first, Indonesian audience.
 
-## Adding components
+## Setup
 
-To add components to your app, run the following command:
+### Pre-execution
+- Supabase project created + secrets in `.env.local`
+- Google OAuth configured
+- Supabase CLI installed + linked
+- shadcn components installed
+- See `docs/Tech Plan.md` Pre-Execution Checklist
+
+### Development
 
 ```bash
-npx shadcn@latest add button
+npm install
+npm run dev
 ```
 
-This will place the ui components in the `components` directory.
+Dev server: `http://localhost:5173`
 
-## Using components
+### Building
 
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
+```bash
+npm run build
 ```
+
+Outputs SPA at `build/client/`.
+
+## Tech stack
+
+- Frontend: React 19 + React Router v7 (SPA mode)
+- Backend: Supabase (Postgres, Auth, RLS)
+- Styling: Tailwind CSS v4 + shadcn/ui
+- Form: React Hook Form + Zod
+- State: TanStack Query
+- i18n: react-i18next (id + en)
+- ORM: Drizzle (schema + migrations)
+- Hosting: Netlify (static SPA)
+
+## Project structure
+
+```
+app/
+  routes/          # RR7 file-based routes
+  components/      # UI components
+  lib/             # utilities, queries, auth
+  app.css          # global styles
+db/
+  schema.ts        # Drizzle schema
+supabase/
+  migrations/      # SQL migrations
+public/
+  manifest.webmanifest  # PWA manifest
+docs/
+  PRD.md          # product spec
+  Tech Plan.md    # implementation plan
+```
+
+## Docs
+
+- **PRD**: `docs/PRD.md` — complete spec, data model, screens, calculations
+- **Tech Plan**: `docs/Tech Plan.md` — step-by-step implementation sequence

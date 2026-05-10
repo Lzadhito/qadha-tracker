@@ -6,21 +6,34 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
 } from "react-router"
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query"
+import { ThemeProvider } from "next-themes"
+import { Toaster } from "~/components/ui/sonner"
+import i18n from "~/lib/i18n"
 
 import type { Route } from "./+types/root"
 import "./app.css"
 
+const queryClient = new QueryClient()
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang={i18n.language ?? "id"} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#2d5a3d" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         <Meta />
         <Links />
       </head>
       <body>
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <QueryClientProvider client={queryClient}>
+            {children}
+            <Toaster />
+          </QueryClientProvider>
+        </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

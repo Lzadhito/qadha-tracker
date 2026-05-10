@@ -1,0 +1,1 @@
+-- Placeholder seed file. No default data for privacy-first app.
