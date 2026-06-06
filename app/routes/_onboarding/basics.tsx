@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
@@ -8,6 +9,7 @@ import { Card } from "~/components/ui/card"
 
 export default function Basics() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [birthYear, setBirthYear] = useState(
     String(new Date().getFullYear() - 25)
   )
@@ -28,14 +30,14 @@ export default function Basics() {
   return (
     <Card className="p-8 space-y-6 max-w-md mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Basic Information</h1>
+        <h1 className="text-2xl font-bold">{t("onboarding.basics.title")}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Let's start with the basics
+          {t("onboarding.basics.subtitle")}
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="birthYear">Birth Year</Label>
+        <Label htmlFor="birthYear">{t("onboarding.basics.birthYear")}</Label>
         <Input
           id="birthYear"
           type="number"
@@ -47,25 +49,25 @@ export default function Basics() {
       </div>
 
       <div className="space-y-3">
-        <Label>Gender</Label>
+        <Label>{t("onboarding.basics.gender")}</Label>
         <RadioGroup value={gender} onValueChange={setGender}>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="male" id="male" />
             <Label htmlFor="male" className="font-normal cursor-pointer">
-              Male
+              {t("onboarding.basics.male")}
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="female" id="female" />
             <Label htmlFor="female" className="font-normal cursor-pointer">
-              Female
+              {t("onboarding.basics.female")}
             </Label>
           </div>
         </RadioGroup>
       </div>
 
       <Button onClick={handleNext} className="w-full">
-        Next
+        {t("common.next")}
       </Button>
     </Card>
   )

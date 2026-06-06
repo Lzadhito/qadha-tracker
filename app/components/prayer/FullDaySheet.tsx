@@ -53,7 +53,7 @@ export function FullDaySheet({ open, onOpenChange }: FullDaySheetProps) {
         </SheetHeader>
         <div className="py-4 space-y-3 px-4">
           <p className="text-xs text-muted-foreground">
-            Logs 1 qadha for Fajr, Dzuhr, Ashr, Maghrib, and Isha for each selected day.
+            Logs 1 qadha for Fajr, Dhuhr, Asr, Maghrib, and Isha for each selected day.
           </p>
           <Button className="w-full" onClick={() => logDays()} disabled={log.isPending}>
             Today (right now)

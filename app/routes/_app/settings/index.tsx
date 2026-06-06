@@ -4,6 +4,8 @@ import { useTheme } from "next-themes"
 import { requireOnboarded } from "~/lib/guards"
 import { signOut } from "~/lib/auth"
 import { supabase } from "~/lib/supabase"
+import { getLocalProfile, saveLocalProfile } from "~/lib/local-profile"
+import i18n from "~/lib/i18n"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
@@ -42,22 +44,26 @@ export default function Settings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [displayName, setDisplayName] = useState("")
-  const [locale, setLocale] = useState("id")
+  const [locale, setLocale] = useState("en")
   const [timezone, setTimezone] = useState("Asia/Jakarta")
 
   useEffect(() => {
     async function load() {
+      const local = getLocalProfile()
+      setDisplayName(local.name ?? "")
+
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
+      if (!session) { setLoading(false); return }
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, locale, timezone")
+        .select("locale, timezone")
         .eq("user_id", session.user.id)
         .maybeSingle()
       if (data) {
-        setDisplayName(data.display_name ?? "")
-        setLocale(data.locale ?? "id")
+        const loc = data.locale ?? "en"
+        setLocale(loc)
         setTimezone(data.timezone ?? "Asia/Jakarta")
+        i18n.changeLanguage(loc)
       }
       setLoading(false)
     }
@@ -67,13 +73,16 @@ export default function Settings() {
   const handleSave = async () => {
     setSaving(true)
     try {
+      saveLocalProfile({ name: displayName || undefined })
+
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: displayName || null, locale, timezone })
+        .update({ locale, timezone })
         .eq("user_id", session.user.id)
       if (error) throw error
+      i18n.changeLanguage(locale)
       toast.success("Profile saved.")
     } catch {
       toast.error("Failed to save profile.")

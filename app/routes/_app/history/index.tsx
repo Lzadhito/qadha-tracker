@@ -2,28 +2,10 @@ import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router"
 import { requireOnboarded } from "~/lib/guards"
 import { useHistory } from "~/lib/queries/use-history"
+import { formatLedgerDate, getPrayerLabel } from "~/lib/format"
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Skeleton } from "~/components/ui/skeleton"
 import type { ObligationType, EntryType } from "~/lib/queries/use-history"
-
-function formatLedgerDate(isoString: string): string {
-  const d = new Date(isoString)
-  const dateStr = d.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Jakarta",
-  })
-  const parts = new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Jakarta",
-  }).formatToParts(d)
-  const h = parts.find((p) => p.type === "hour")?.value ?? "00"
-  const m = parts.find((p) => p.type === "minute")?.value ?? "00"
-  return `${dateStr}, ${h}:${m} WIB`
-}
 
 export async function clientLoader() {
   return requireOnboarded()
@@ -34,14 +16,6 @@ const ENTRY_LABELS: Record<string, string> = {
   miss: "Miss",
   baseline: "Baseline",
   adjustment: "Adjustment",
-}
-
-const PRAYER_LABELS: Record<string, string> = {
-  subuh: "Subuh",
-  zuhur: "Zuhur",
-  asar: "Asar",
-  maghrib: "Maghrib",
-  isya: "Isya",
 }
 
 export default function History() {
@@ -100,7 +74,7 @@ export default function History() {
                 <div>
                   <p className="text-sm font-medium">
                     {entry.obligation === "prayer"
-                      ? `${PRAYER_LABELS[(entry as any).prayer] ?? ""} — ${ENTRY_LABELS[entry.entry_type] ?? entry.entry_type}`
+                      ? `${getPrayerLabel((entry as any).prayer)} — ${ENTRY_LABELS[entry.entry_type] ?? entry.entry_type}`
                       : `Fasting — ${ENTRY_LABELS[entry.entry_type] ?? entry.entry_type}`}
                   </p>
                   <p className="text-xs text-muted-foreground">

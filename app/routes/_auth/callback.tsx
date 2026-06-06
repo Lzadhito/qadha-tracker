@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router"
+import { useTranslation } from "react-i18next"
 import { supabase } from "~/lib/supabase"
 
 async function resolvePostAuth(userId: string) {
@@ -12,7 +13,7 @@ async function resolvePostAuth(userId: string) {
   if (!profile) {
     await supabase.from("profiles").insert({
       user_id: userId,
-      locale: "id",
+      locale: "en",
       timezone: "Asia/Jakarta",
     })
     return "/onboarding/basics"
@@ -23,6 +24,7 @@ async function resolvePostAuth(userId: string) {
 
 export default function Callback() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -67,7 +69,7 @@ export default function Callback() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <p className="text-muted-foreground text-sm">Signing in...</p>
+      <p className="text-muted-foreground text-sm">{t("auth.signingIn")}</p>
     </div>
   )
 }

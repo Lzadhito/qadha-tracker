@@ -1,10 +1,12 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { signInWithMagicLink, signInWithGoogle } from "~/lib/auth"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Card } from "~/components/ui/card"
 
 export default function SignIn() {
+  const { t } = useTranslation()
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
@@ -28,28 +30,28 @@ export default function SignIn() {
   return (
     <Card className="p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Qadha Tracker</h1>
+        <h1 className="text-2xl font-bold">{t("auth.title")}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Track your qadha journey
+          {t("auth.subtitle")}
         </p>
       </div>
 
       {sent ? (
         <div className="text-center space-y-2">
           <p className="text-sm text-foreground/80">
-            Check your email for a magic link to sign in.
+            {t("auth.checkEmail")}
           </p>
         </div>
       ) : (
         <div className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t("auth.email")}
             </label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("auth.emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
@@ -61,7 +63,7 @@ export default function SignIn() {
             disabled={loading || !email}
             className="w-full"
           >
-            {loading ? "Loading..." : "Send magic link"}
+            {loading ? t("common.loading") : t("auth.sendMagicLink")}
           </Button>
 
           <div className="relative">
@@ -69,7 +71,7 @@ export default function SignIn() {
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or</span>
+              <span className="bg-card px-2 text-muted-foreground">{t("common.or")}</span>
             </div>
           </div>
 
@@ -79,13 +81,13 @@ export default function SignIn() {
             variant="outline"
             className="w-full"
           >
-            Continue with Google
+            {t("auth.continueGoogle")}
           </Button>
         </div>
       )}
 
       <p className="text-xs text-muted-foreground text-center">
-        By continuing, you agree to our privacy policy.
+        {t("auth.privacy")}
       </p>
     </Card>
   )

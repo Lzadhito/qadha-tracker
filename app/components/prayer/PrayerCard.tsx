@@ -6,15 +6,8 @@ import { Button } from "~/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
 import { Calendar } from "~/components/ui/calendar"
 import { usePrayerLog, useUndoTodayPrayerLog } from "~/lib/queries/use-log-mutation"
+import { PRAYER_LABELS } from "~/lib/format"
 import type { Prayer } from "~/lib/queries/use-remaining"
-
-const PRAYER_LABELS: Record<Prayer, string> = {
-  subuh: "Subuh",
-  zuhur: "Zuhur",
-  asar: "Asar",
-  maghrib: "Maghrib",
-  isya: "Isya",
-}
 
 interface PrayerCardProps {
   prayer: Prayer

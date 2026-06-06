@@ -6,7 +6,9 @@
       "Bash(npm run *)",
       "Bash(npx shadcn *)",
       "Bash(npx tsc *)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Bash(gh repo *)",
+      "PowerShell(gh *)"
     ]
   }
 }

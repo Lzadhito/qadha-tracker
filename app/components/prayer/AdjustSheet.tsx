@@ -7,14 +7,7 @@ import { Separator } from "~/components/ui/separator"
 import { usePrayerAdjust, useFastingAdjust } from "~/lib/queries/use-log-mutation"
 import { PRAYERS } from "~/lib/queries/use-remaining"
 import type { Prayer } from "~/lib/queries/use-remaining"
-
-const PRAYER_LABELS: Record<Prayer, string> = {
-  subuh: "Fajr (Subuh)",
-  zuhur: "Dzuhr (Zuhur)",
-  asar: "Ashr (Asar)",
-  maghrib: "Maghrib",
-  isya: "Isha (Isya)",
-}
+import { PRAYER_LABELS } from "~/lib/format"
 
 interface PrayerRow { prayer: Prayer; displayRemaining: number }
 

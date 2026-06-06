@@ -1,26 +1,107 @@
 {
+  "common": {
+    "back": "Back",
+    "next": "Next",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "remove": "Remove",
+    "save": "Save",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "or": "Or",
+    "rightNow": "Right now"
+  },
   "auth": {
     "title": "Qadha Tracker",
     "subtitle": "Track your qadha journey",
     "email": "Email",
+    "emailPlaceholder": "you@example.com",
     "sendMagicLink": "Send magic link",
+    "checkEmail": "Check your email for a magic link to sign in.",
     "continueGoogle": "Continue with Google",
-    "checkEmail": "Check your email for a sign-in link.",
     "privacy": "By continuing, you agree to our privacy policy.",
     "signingIn": "Signing in..."
   },
+  "prayers": {
+    "subuh": "Fajr",
+    "zuhur": "Dhuhr",
+    "asar": "Asr",
+    "maghrib": "Maghrib",
+    "isya": "Isha"
+  },
+  "duration": {
+    "year_one": "{{count}} year",
+    "year_other": "{{count}} years",
+    "month_one": "{{count}} month",
+    "month_other": "{{count}} months",
+    "day_one": "{{count}} day",
+    "day_other": "{{count}} days"
+  },
   "log": {
     "title": "Daily Log",
+    "prayerLeft": "{{duration}} of prayer qadha left",
+    "fastingLeft": "{{duration}} of fasting qadha left",
+    "qadhaRemaining_one": "+Qadha remaining {{count}} prayer today",
+    "qadhaRemaining_other": "+Qadha remaining {{count}} prayers today",
+    "qadhaFullDay": "+Qadha full day (all 5)",
+    "adjustRemaining": "Adjust remaining"
+  },
+  "prayerCard": {
     "remaining": "{{count}} remaining",
-    "qadha": "+1 Qadha",
-    "miss": "Miss",
+    "allPaidOff": "All paid off",
+    "today": "Today",
+    "undoTitle": "Undo today's log",
+    "qadha": "+Qadha",
+    "whenDidYou": "When did you qadha {{prayer}}?",
+    "selectOrDrag": "Select a single day or drag to pick a range.",
+    "orChooseDates": "or choose date(s)",
+    "selectDates": "Select date(s) above",
+    "logFor": "Log for {{date}}",
+    "logRange": "Log {{from}} – {{to}} ({{count}} days)"
+  },
+  "fastingCard": {
+    "label": "Fasting",
     "done": "Done 🌙",
+    "daysRemaining": "{{count}} days remaining",
+    "log1Fast": "Log 1 Fast",
+    "whenFast": "When did you fast this qadha?",
+    "orChooseDateTime": "or choose date & time",
+    "time": "Time",
+    "logForAt": "Log for {{date}} at {{time}}",
+    "selectDateAbove": "Select a date above"
+  },
+  "remaining": {
+    "title_one": "+Qadha remaining {{count}} prayer",
+    "title_other": "+Qadha remaining {{count}} prayers",
+    "rightNowToday": "Right now ({{count}} remaining today)",
+    "orPickDate": "or pick a date",
+    "checking": "Checking logged prayers…",
+    "allLogged": "All prayers already logged for this day.",
+    "selectDates": "Select date(s) above",
+    "logForDate_one": "Log {{count}} prayer for {{date}}",
+    "logForDate_other": "Log {{count}} prayers for {{date}}",
+    "logAllRange": "Log all prayers for {{from}} – {{to}} ({{count}} entries)"
+  },
+  "fullDay": {
+    "title": "Log full day — all 5 prayers",
+    "desc": "Logs 1 qadha for Fajr, Dhuhr, Asr, Maghrib, and Isha for each selected day.",
+    "todayNow": "Today (right now)",
+    "orChooseDates": "or choose date(s)",
+    "selectDates": "Select date(s) above",
+    "logFor": "Log for {{date}}",
+    "logRange": "Log {{from}} – {{to}} ({{count}} days)"
+  },
+  "adjust": {
+    "title": "Adjust remaining qadha",
+    "desc": "Change the count directly. The difference is recorded as an adjustment in your history.",
+    "addToAll": "Add days to all prayers",
+    "add": "Add",
+    "addToAllDesc": "Adds this count to each of the 5 prayers.",
+    "setExact": "Set exact remaining per prayer",
     "fasting": "Fasting",
-    "fastingDays": "{{count}} days remaining",
-    "logFast": "Log 1 Fast",
-    "logSpecificDay": "Log specific day...",
-    "logMissForDate": "Log miss for {{date}}",
-    "selectDate": "Select a date"
+    "daysRemaining": "Days remaining",
+    "saveAdjustments": "Save adjustments",
+    "days": "days"
   },
   "history": {
     "title": "History",
@@ -31,43 +112,72 @@
     "miss": "Miss",
     "baseline": "Baseline",
     "adjustment": "Adjustment",
+    "entryDetail": "Entry Detail",
+    "type": "Type",
+    "amount": "Amount",
+    "loggedAt": "Logged at",
+    "fastedOn": "Fasted on",
+    "fastingType": "Fasting",
     "deleteEntry": "Delete entry",
     "deleteConfirm": "Delete this entry?",
-    "deleteDescription": "Your remaining count will adjust accordingly. This cannot be undone.",
-    "cancel": "Cancel",
-    "delete": "Delete"
+    "deleteDescription": "Remaining count adjusts accordingly. Cannot be undone."
   },
   "settings": {
     "title": "Settings",
-    "myPhases": "My Phases",
+    "profile": "Profile",
+    "displayName": "Display name (optional)",
+    "displayNamePlaceholder": "Your name",
+    "language": "Language",
+    "timezone": "Timezone",
+    "saveProfile": "Save profile",
+    "appearance": "Appearance",
+    "darkMode": "Dark mode",
     "dataPrivacy": "Data & Privacy",
     "about": "About",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "saved": "Profile saved.",
+    "saveFailed": "Failed to save profile."
   },
   "data": {
-    "howWeHandle": "How we handle your data",
-    "description1": "We store the count of prayers and fasts you owe, the dates you logged actions, and your basic profile. Nothing else.",
-    "description2": "We do not ask why a prayer or fast was missed. We do not store notes. We do not track patterns. That is between you and Allah.",
-    "description3": "Your data is encrypted at rest and only you can read it. You can export it or delete your account at any time.",
+    "title": "Data & Privacy",
+    "intro1": "We store your prayer and fasting counts, phase configuration, and basic profile. Nothing else.",
+    "intro2": "We never ask why a prayer or fast was missed. No notes. No tracking. That is between you and Allah.",
+    "intro3": "Your data is encrypted at rest. Only you can read it.",
     "export": "Export all data (JSON)",
     "exporting": "Exporting...",
     "deleteAccount": "Delete account & all data",
     "deleteConfirm": "Delete account?",
-    "deleteDescription": "This permanently deletes your account and all data — prayers, fasts, phases, profile. This cannot be undone.",
+    "deleteDescription": "This permanently deletes your account and all data — prayers, fasts, profile. This cannot be undone.",
     "deleteEverything": "Delete everything",
     "deleting": "Deleting..."
   },
   "about": {
     "title": "About",
+    "howWeHandle": "How we handle your data",
+    "p1": "We store the count of prayers and fasts you owe, the dates you logged actions, and your basic profile. Nothing else.",
+    "p2": "We do not ask why a prayer or fast was missed. We do not store notes. We do not track patterns. That is between you and Allah.",
+    "p3": "Your data is encrypted at rest and only you can read it. You can export it or delete your account at any time from Settings → Data.",
     "version": "Qadha Tracker v0.1.0",
     "disclaimer": "Not a fiqh authority. Consult your own scholar for rulings."
   },
-  "prayers": {
-    "subuh": "Subuh",
-    "zuhur": "Zuhur",
-    "asar": "Asar",
-    "maghrib": "Maghrib",
-    "isya": "Isya"
+  "phase": {
+    "phaseN": "Phase {{n}}",
+    "startYear": "Start year",
+    "endYear": "End year",
+    "pattern": "Pattern",
+    "daysMissed": "Days missed per Ramadan (0–30)",
+    "prayer": {
+      "consistent": "Praying consistently (no qadha)",
+      "completely_missed": "Missing prayers (assume all missed)"
+    },
+    "fasting": {
+      "all_fasted": "All fasted (0/Ramadan)",
+      "few_missed": "Few missed (~5/Ramadan)",
+      "half": "About half (15/Ramadan)",
+      "few_fasted": "Mostly missed (25/Ramadan)",
+      "none_fasted": "None fasted (30/Ramadan)",
+      "custom": "Custom"
+    }
   },
   "onboarding": {
     "basics": {
@@ -76,24 +186,69 @@
       "birthYear": "Birth Year",
       "gender": "Gender",
       "male": "Male",
-      "female": "Female",
-      "next": "Next"
+      "female": "Female"
     },
     "baligh": {
       "title": "Age of Religious Responsibility",
-      "subtitle": "When did you reach baligh?",
-      "remember": "I remember the year",
+      "subtitle": "When did you reach baligh (puberty)?",
+      "remember": "I remember my age",
+      "ageAtBaligh": "Age at baligh",
       "estimate": "Help me figure it out",
-      "unknown": "I don't know (default: age 15)",
-      "next": "Next",
-      "back": "Back"
+      "yearBecame": "Year you became baligh",
+      "firstPeriodAge": "Age at first period (optional — overrides year)",
+      "firstPeriodPlaceholder": "e.g. 12",
+      "estimatedAgeLabel": "Estimated age:",
+      "unknown": "I don't know",
+      "unknownNote": "Using age 15 — the default most scholars apply when uncertain."
+    },
+    "prayers": {
+      "title": "Missed Prayers",
+      "subtitle": "Choose how you want to enter your missed prayers.",
+      "tabPhases": "By life phases",
+      "tabQuick": "Quick estimate",
+      "phasesDesc": "Break your life into periods (e.g. school, university, work) and estimate how consistently you prayed in each.",
+      "addPhase": "+ Add phase",
+      "estimatedTotal": "Estimated total",
+      "perPrayer": "{{count}} per prayer × 5",
+      "quickDesc": "Don't remember specific years? Enter a rough total directly.",
+      "byYears": "I remember by years",
+      "byMonths": "I remember by months",
+      "byDays": "I remember by days",
+      "exactOption": "I know the exact count per prayer",
+      "unitYears": "years",
+      "unitMonths": "months",
+      "unitDays": "days",
+      "howMany": "How many {{unit}} of prayers did you miss?",
+      "prayersUnit": "prayers",
+      "prayersAcross": "prayers across all 5"
+    },
+    "fasting": {
+      "title": "Fasting Phases",
+      "subtitle": "How many Ramadan days did you miss per year?",
+      "addPhase": "+ Add phase",
+      "estimatedTotal": "Estimated total",
+      "daysToMakeUp": "days of fasting to make up"
+    },
+    "menstruation": {
+      "title": "Menstruation Details",
+      "subtitle": "Used to calculate prayer and fasting qadha accurately.",
+      "note1": "Menstruation days are <1>excluded</1> from prayer qadha — you are exempt.",
+      "note2": "Menstruation days during Ramadan are <1>included</1> in fasting qadha — these must be made up.",
+      "avgCycle": "Average cycle length (days)",
+      "avgPeriod": "Average period length (days)",
+      "avgPeriodRamadan": "Average period days during Ramadan"
     },
     "review": {
       "title": "Review",
-      "subtitle": "Confirm to continue",
-      "start": "Start",
-      "back": "Back",
-      "submitting": "Submitting..."
+      "subtitle": "Here's your qadha debt.",
+      "totalPrayer": "Total prayer qadha",
+      "totalFasting": "Total fasting qadha",
+      "days": "days",
+      "adjustLater": "You can adjust these later in Settings.",
+      "adjust": "Adjust",
+      "confirm": "Looks right — start",
+      "submitting": "Saving...",
+      "genericError": "Something went wrong. Please try again."
     }
   }
 }

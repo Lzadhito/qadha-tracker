@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { requireOnboarded } from "~/lib/guards"
 import { PRAYERS, usePrayerRemaining, useFastingRemaining, useTodayPrayerLog } from "~/lib/queries/use-remaining"
+import { formatTodayDate } from "~/lib/format"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { FullDaySheet } from "~/components/prayer/FullDaySheet"
@@ -49,11 +50,7 @@ export default function Log() {
   const prayerSummary = loaded ? formatPrayerLeft(Math.ceil(prayerRemaining / 5)) : null
   const fastingSummary = loaded ? formatFastingLeft(fastingRemaining) : null
 
-  const today = new Date().toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  })
+  const today = formatTodayDate()
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-2">

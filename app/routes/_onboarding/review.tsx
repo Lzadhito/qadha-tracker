@@ -67,7 +67,7 @@ export default function Review() {
         .from("profiles")
         .upsert({
           user_id: uid,
-          locale: "id",
+          locale: "en",
           timezone: "Asia/Jakarta",
           onboarded_at: new Date().toISOString(),
         }, { onConflict: "user_id" })

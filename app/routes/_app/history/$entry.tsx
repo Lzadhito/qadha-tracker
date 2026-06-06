@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router"
 import { requireOnboarded } from "~/lib/guards"
 import { useHistoryEntry, useDeleteEntry } from "~/lib/queries/use-history"
+import { formatLedgerDate, getPrayerLabel } from "~/lib/format"
 import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
 import {
@@ -19,38 +20,11 @@ export async function clientLoader() {
   return requireOnboarded()
 }
 
-function formatLedgerDate(isoString: string): string {
-  const d = new Date(isoString)
-  const dateStr = d.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Jakarta",
-  })
-  const parts = new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Jakarta",
-  }).formatToParts(d)
-  const h = parts.find((p) => p.type === "hour")?.value ?? "00"
-  const m = parts.find((p) => p.type === "minute")?.value ?? "00"
-  return `${dateStr}, ${h}:${m} WIB`
-}
-
 const ENTRY_LABELS: Record<string, string> = {
   qadha: "Qadha",
   miss: "Miss",
   baseline: "Baseline",
   adjustment: "Adjustment",
-}
-
-const PRAYER_LABELS: Record<string, string> = {
-  subuh: "Subuh",
-  zuhur: "Zuhur",
-  asar: "Asar",
-  maghrib: "Maghrib",
-  isya: "Isya",
 }
 
 export default function HistoryEntry() {
@@ -87,7 +61,7 @@ export default function HistoryEntry() {
             <span className="text-sm text-muted-foreground">Type</span>
             <span className="text-sm font-medium">
               {entry.data.obligation === "prayer"
-                ? `${PRAYER_LABELS[(entry.data as any).prayer] ?? ""} — ${ENTRY_LABELS[entry.data.entry_type] ?? entry.data.entry_type}`
+                ? `${getPrayerLabel((entry.data as any).prayer)} — ${ENTRY_LABELS[entry.data.entry_type] ?? entry.data.entry_type}`
                 : `Fasting — ${ENTRY_LABELS[entry.data.entry_type] ?? entry.data.entry_type}`}
             </span>
           </div>

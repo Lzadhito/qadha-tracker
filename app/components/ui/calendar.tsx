@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { format } from "date-fns"
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -40,8 +41,7 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       formatters={{
-        formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+        formatMonthDropdown: (date) => format(date, "MMM"),
         ...formatters,
       }}
       classNames={{

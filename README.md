@@ -2,6 +2,8 @@
 
 A web app for Muslims to track and manage missed (*qadha*) prayers and Ramadan fasts.
 
+> **Fiqh basis:** Built on the **jumhur** (majority) position that qadha is obligatory for all missed prayers. Note: Ibn Taymiyyah held that prayers missed out of deliberate neglect require repentance rather than make-up — this app does not implement that view.
+
 ## Features
 
 - **Onboarding wizard** — enter birth year, gender, *baligh* age, menstruation averages (for women), and missed-prayer / fasting phases to calculate your baseline debt

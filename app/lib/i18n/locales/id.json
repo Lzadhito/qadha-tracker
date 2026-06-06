@@ -1,26 +1,107 @@
 {
+  "common": {
+    "back": "Kembali",
+    "next": "Selanjutnya",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "remove": "Hapus",
+    "save": "Simpan",
+    "saving": "Menyimpan...",
+    "loading": "Memuat...",
+    "or": "Atau",
+    "rightNow": "Sekarang"
+  },
   "auth": {
     "title": "Qadha Tracker",
     "subtitle": "Catat perjalanan qadha-mu",
     "email": "Email",
+    "emailPlaceholder": "kamu@contoh.com",
     "sendMagicLink": "Kirim magic link",
-    "continueGoogle": "Lanjut dengan Google",
     "checkEmail": "Cek email kamu untuk link masuk.",
+    "continueGoogle": "Lanjut dengan Google",
     "privacy": "Dengan melanjutkan, kamu menyetujui kebijakan privasi kami.",
     "signingIn": "Sedang masuk..."
   },
+  "prayers": {
+    "subuh": "Subuh",
+    "zuhur": "Zuhur",
+    "asar": "Asar",
+    "maghrib": "Magrib",
+    "isya": "Isya"
+  },
+  "duration": {
+    "year_one": "{{count}} tahun",
+    "year_other": "{{count}} tahun",
+    "month_one": "{{count}} bulan",
+    "month_other": "{{count}} bulan",
+    "day_one": "{{count}} hari",
+    "day_other": "{{count}} hari"
+  },
   "log": {
     "title": "Catatan Harian",
+    "prayerLeft": "Sisa qadha shalat {{duration}}",
+    "fastingLeft": "Sisa qadha puasa {{duration}}",
+    "qadhaRemaining_one": "+Qadha sisa {{count}} shalat hari ini",
+    "qadhaRemaining_other": "+Qadha sisa {{count}} shalat hari ini",
+    "qadhaFullDay": "+Qadha satu hari penuh (semua 5)",
+    "adjustRemaining": "Sesuaikan sisa"
+  },
+  "prayerCard": {
     "remaining": "{{count}} tersisa",
-    "qadha": "+1 Qadha",
-    "miss": "Lewat",
+    "allPaidOff": "Lunas semua",
+    "today": "Hari ini",
+    "undoTitle": "Batalkan catatan hari ini",
+    "qadha": "+Qadha",
+    "whenDidYou": "Kapan kamu meng-qadha {{prayer}}?",
+    "selectOrDrag": "Pilih satu hari atau geser untuk memilih rentang.",
+    "orChooseDates": "atau pilih tanggal",
+    "selectDates": "Pilih tanggal di atas",
+    "logFor": "Catat untuk {{date}}",
+    "logRange": "Catat {{from}} – {{to}} ({{count}} hari)"
+  },
+  "fastingCard": {
+    "label": "Puasa",
     "done": "Selesai 🌙",
+    "daysRemaining": "{{count}} hari tersisa",
+    "log1Fast": "Catat 1 Puasa",
+    "whenFast": "Kapan kamu puasa qadha ini?",
+    "orChooseDateTime": "atau pilih tanggal & waktu",
+    "time": "Waktu",
+    "logForAt": "Catat untuk {{date}} pukul {{time}}",
+    "selectDateAbove": "Pilih tanggal di atas"
+  },
+  "remaining": {
+    "title_one": "+Qadha sisa {{count}} shalat",
+    "title_other": "+Qadha sisa {{count}} shalat",
+    "rightNowToday": "Sekarang ({{count}} tersisa hari ini)",
+    "orPickDate": "atau pilih tanggal",
+    "checking": "Memeriksa shalat yang sudah dicatat…",
+    "allLogged": "Semua shalat sudah dicatat untuk hari ini.",
+    "selectDates": "Pilih tanggal di atas",
+    "logForDate_one": "Catat {{count}} shalat untuk {{date}}",
+    "logForDate_other": "Catat {{count}} shalat untuk {{date}}",
+    "logAllRange": "Catat semua shalat untuk {{from}} – {{to}} ({{count}} entri)"
+  },
+  "fullDay": {
+    "title": "Catat satu hari penuh — semua 5 shalat",
+    "desc": "Mencatat 1 qadha untuk Subuh, Zuhur, Asar, Magrib, dan Isya untuk tiap hari yang dipilih.",
+    "todayNow": "Hari ini (sekarang)",
+    "orChooseDates": "atau pilih tanggal",
+    "selectDates": "Pilih tanggal di atas",
+    "logFor": "Catat untuk {{date}}",
+    "logRange": "Catat {{from}} – {{to}} ({{count}} hari)"
+  },
+  "adjust": {
+    "title": "Sesuaikan sisa qadha",
+    "desc": "Ubah jumlah secara langsung. Selisihnya dicatat sebagai koreksi di riwayatmu.",
+    "addToAll": "Tambah hari ke semua shalat",
+    "add": "Tambah",
+    "addToAllDesc": "Menambahkan jumlah ini ke tiap-tiap 5 shalat.",
+    "setExact": "Atur sisa pasti per shalat",
     "fasting": "Puasa",
-    "fastingDays": "{{count}} hari tersisa",
-    "logFast": "Catat 1 Puasa",
-    "logSpecificDay": "Catat hari tertentu...",
-    "logMissForDate": "Catat lewat untuk {{date}}",
-    "selectDate": "Pilih tanggal"
+    "daysRemaining": "Hari tersisa",
+    "saveAdjustments": "Simpan koreksi",
+    "days": "hari"
   },
   "history": {
     "title": "Riwayat",
@@ -31,43 +112,72 @@
     "miss": "Lewat",
     "baseline": "Awal",
     "adjustment": "Koreksi",
+    "entryDetail": "Detail Entri",
+    "type": "Jenis",
+    "amount": "Jumlah",
+    "loggedAt": "Dicatat pada",
+    "fastedOn": "Puasa pada",
+    "fastingType": "Puasa",
     "deleteEntry": "Hapus entri",
     "deleteConfirm": "Hapus entri ini?",
-    "deleteDescription": "Jumlah tersisa akan menyesuaikan. Tidak bisa dibatalkan.",
-    "cancel": "Batal",
-    "delete": "Hapus"
+    "deleteDescription": "Jumlah tersisa akan menyesuaikan. Tidak bisa dibatalkan."
   },
   "settings": {
     "title": "Pengaturan",
-    "myPhases": "Fase Saya",
+    "profile": "Profil",
+    "displayName": "Nama tampilan (opsional)",
+    "displayNamePlaceholder": "Namamu",
+    "language": "Bahasa",
+    "timezone": "Zona waktu",
+    "saveProfile": "Simpan profil",
+    "appearance": "Tampilan",
+    "darkMode": "Mode gelap",
     "dataPrivacy": "Data & Privasi",
     "about": "Tentang",
-    "signOut": "Keluar"
+    "signOut": "Keluar",
+    "saved": "Profil tersimpan.",
+    "saveFailed": "Gagal menyimpan profil."
   },
   "data": {
-    "howWeHandle": "Cara kami menangani datamu",
-    "description1": "Kami menyimpan jumlah shalat dan puasa yang masih kamu hutang, tanggal kamu mencatat, dan profil dasarmu. Tidak lebih.",
-    "description2": "Kami tidak bertanya kenapa shalat atau puasa terlewat. Tidak ada catatan. Tidak ada pelacakan. Itu urusanmu dengan Allah.",
-    "description3": "Data kamu terenkripsi dan hanya kamu yang bisa membacanya. Kamu bisa mengekspor atau menghapus akun kapan saja.",
+    "title": "Data & Privasi",
+    "intro1": "Kami menyimpan jumlah shalat dan puasa, konfigurasi fase, dan profil dasarmu. Tidak lebih.",
+    "intro2": "Kami tidak pernah bertanya kenapa shalat atau puasa terlewat. Tidak ada catatan. Tidak ada pelacakan. Itu urusanmu dengan Allah.",
+    "intro3": "Data kamu terenkripsi saat disimpan. Hanya kamu yang bisa membacanya.",
     "export": "Ekspor semua data (JSON)",
     "exporting": "Mengekspor...",
     "deleteAccount": "Hapus akun & semua data",
     "deleteConfirm": "Hapus akun?",
-    "deleteDescription": "Ini menghapus akun dan semua data — shalat, puasa, fase, profil. Tidak bisa dibatalkan.",
+    "deleteDescription": "Ini menghapus permanen akun dan semua data — shalat, puasa, profil. Tidak bisa dibatalkan.",
     "deleteEverything": "Hapus semuanya",
     "deleting": "Menghapus..."
   },
   "about": {
     "title": "Tentang",
+    "howWeHandle": "Cara kami menangani datamu",
+    "p1": "Kami menyimpan jumlah shalat dan puasa yang masih kamu hutang, tanggal kamu mencatat, dan profil dasarmu. Tidak lebih.",
+    "p2": "Kami tidak bertanya kenapa shalat atau puasa terlewat. Tidak ada catatan. Tidak ada pelacakan. Itu urusanmu dengan Allah.",
+    "p3": "Data kamu terenkripsi dan hanya kamu yang bisa membacanya. Kamu bisa mengekspor atau menghapus akun kapan saja dari Pengaturan → Data.",
     "version": "Qadha Tracker v0.1.0",
     "disclaimer": "Bukan otoritas fiqh. Konsultasikan dengan ustadz atau ulamamu."
   },
-  "prayers": {
-    "subuh": "Subuh",
-    "zuhur": "Zuhur",
-    "asar": "Asar",
-    "maghrib": "Maghrib",
-    "isya": "Isya"
+  "phase": {
+    "phaseN": "Fase {{n}}",
+    "startYear": "Tahun mulai",
+    "endYear": "Tahun akhir",
+    "pattern": "Pola",
+    "daysMissed": "Hari terlewat per Ramadan (0–30)",
+    "prayer": {
+      "consistent": "Shalat konsisten (tanpa qadha)",
+      "completely_missed": "Meninggalkan shalat (anggap semua terlewat)"
+    },
+    "fasting": {
+      "all_fasted": "Puasa penuh (0/Ramadan)",
+      "few_missed": "Sedikit terlewat (~5/Ramadan)",
+      "half": "Sekitar setengah (15/Ramadan)",
+      "few_fasted": "Banyak terlewat (25/Ramadan)",
+      "none_fasted": "Tidak puasa (30/Ramadan)",
+      "custom": "Kustom"
+    }
   },
   "onboarding": {
     "basics": {
@@ -76,24 +186,69 @@
       "birthYear": "Tahun Lahir",
       "gender": "Jenis Kelamin",
       "male": "Laki-laki",
-      "female": "Perempuan",
-      "next": "Selanjutnya"
+      "female": "Perempuan"
     },
     "baligh": {
       "title": "Usia Baligh",
-      "subtitle": "Kapan kamu baligh?",
-      "remember": "Saya ingat tahunnya",
+      "subtitle": "Kapan kamu mencapai baligh (pubertas)?",
+      "remember": "Saya ingat usianya",
+      "ageAtBaligh": "Usia saat baligh",
       "estimate": "Bantu saya menghitungnya",
-      "unknown": "Saya tidak tahu (default: usia 15)",
-      "next": "Selanjutnya",
-      "back": "Kembali"
+      "yearBecame": "Tahun kamu baligh",
+      "firstPeriodAge": "Usia haid pertama (opsional — menimpa tahun)",
+      "firstPeriodPlaceholder": "mis. 12",
+      "estimatedAgeLabel": "Estimasi usia:",
+      "unknown": "Saya tidak tahu",
+      "unknownNote": "Memakai usia 15 — default yang dipakai kebanyakan ulama saat tidak yakin."
+    },
+    "prayers": {
+      "title": "Shalat yang Terlewat",
+      "subtitle": "Pilih cara kamu memasukkan shalat yang terlewat.",
+      "tabPhases": "Per fase hidup",
+      "tabQuick": "Estimasi cepat",
+      "phasesDesc": "Bagi hidupmu jadi beberapa periode (mis. sekolah, kuliah, kerja) dan perkirakan seberapa konsisten kamu shalat di tiap periode.",
+      "addPhase": "+ Tambah fase",
+      "estimatedTotal": "Estimasi total",
+      "perPrayer": "{{count}} per shalat × 5",
+      "quickDesc": "Tidak ingat tahun pastinya? Masukkan perkiraan total langsung.",
+      "byYears": "Saya ingat dalam tahun",
+      "byMonths": "Saya ingat dalam bulan",
+      "byDays": "Saya ingat dalam hari",
+      "exactOption": "Saya tahu jumlah pasti per shalat",
+      "unitYears": "tahun",
+      "unitMonths": "bulan",
+      "unitDays": "hari",
+      "howMany": "Berapa {{unit}} shalat yang kamu lewatkan?",
+      "prayersUnit": "shalat",
+      "prayersAcross": "shalat untuk semua 5"
+    },
+    "fasting": {
+      "title": "Fase Puasa",
+      "subtitle": "Berapa hari Ramadan yang kamu lewatkan per tahun?",
+      "addPhase": "+ Tambah fase",
+      "estimatedTotal": "Estimasi total",
+      "daysToMakeUp": "hari puasa yang harus diganti"
+    },
+    "menstruation": {
+      "title": "Detail Menstruasi",
+      "subtitle": "Dipakai untuk menghitung qadha shalat dan puasa secara akurat.",
+      "note1": "Hari haid <1>dikecualikan</1> dari qadha shalat — kamu mendapat keringanan.",
+      "note2": "Hari haid saat Ramadan <1>termasuk</1> dalam qadha puasa — ini wajib diganti.",
+      "avgCycle": "Rata-rata panjang siklus (hari)",
+      "avgPeriod": "Rata-rata lama haid (hari)",
+      "avgPeriodRamadan": "Rata-rata hari haid saat Ramadan"
     },
     "review": {
       "title": "Ringkasan",
-      "subtitle": "Konfirmasi untuk melanjutkan",
-      "start": "Mulai",
-      "back": "Kembali",
-      "submitting": "Menyimpan..."
+      "subtitle": "Ini hutang qadha-mu.",
+      "totalPrayer": "Total qadha shalat",
+      "totalFasting": "Total qadha puasa",
+      "days": "hari",
+      "adjustLater": "Kamu bisa menyesuaikan ini nanti di Pengaturan.",
+      "adjust": "Sesuaikan",
+      "confirm": "Sudah benar — mulai",
+      "submitting": "Menyimpan...",
+      "genericError": "Terjadi kesalahan. Silakan coba lagi."
     }
   }
 }

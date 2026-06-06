@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { Label } from "~/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group"
@@ -12,6 +13,7 @@ function getOnboardingData() {
 
 export default function Baligh() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const data = getOnboardingData()
   const birthYear: number = data.birthYear ?? new Date().getFullYear() - 25
 
@@ -42,9 +44,9 @@ export default function Baligh() {
   return (
     <Card className="p-8 space-y-6 max-w-md mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Age of Religious Responsibility</h1>
+        <h1 className="text-2xl font-bold">{t("onboarding.baligh.title")}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          When did you reach baligh (puberty)?
+          {t("onboarding.baligh.subtitle")}
         </p>
       </div>
 
@@ -56,12 +58,12 @@ export default function Baligh() {
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="remember" id="remember" />
               <Label htmlFor="remember" className="font-normal cursor-pointer">
-                I remember my age
+                {t("onboarding.baligh.remember")}
               </Label>
             </div>
             {branch === "remember" && (
               <div className="ml-6 space-y-1">
-                <Label className="text-xs">Age at baligh</Label>
+                <Label className="text-xs">{t("onboarding.baligh.ageAtBaligh")}</Label>
                 <Input
                   type="number"
                   min={7}
@@ -79,13 +81,13 @@ export default function Baligh() {
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="estimate" id="estimate" />
               <Label htmlFor="estimate" className="font-normal cursor-pointer">
-                Help me figure it out
+                {t("onboarding.baligh.estimate")}
               </Label>
             </div>
             {branch === "estimate" && (
               <div className="ml-6 space-y-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">Year you became baligh</Label>
+                  <Label className="text-xs">{t("onboarding.baligh.yearBecame")}</Label>
                   <Input
                     type="number"
                     min={birthYear + 7}
@@ -98,13 +100,13 @@ export default function Baligh() {
                 {data.gender === "female" && (
                   <div className="space-y-1">
                     <Label className="text-xs">
-                      Age at first period (optional — overrides year)
+                      {t("onboarding.baligh.firstPeriodAge")}
                     </Label>
                     <Input
                       type="number"
                       min={7}
                       max={20}
-                      placeholder="e.g. 12"
+                      placeholder={t("onboarding.baligh.firstPeriodPlaceholder")}
                       value={firstPeriodAge}
                       onChange={(e) => setFirstPeriodAge(e.target.value)}
                       className="w-28"
@@ -112,7 +114,7 @@ export default function Baligh() {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Estimated age: <strong>{estimatedAge}</strong>
+                  {t("onboarding.baligh.estimatedAgeLabel")} <strong>{estimatedAge}</strong>
                 </p>
               </div>
             )}
@@ -122,12 +124,12 @@ export default function Baligh() {
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="unknown" id="unknown" />
             <Label htmlFor="unknown" className="font-normal cursor-pointer">
-              I don't know
+              {t("onboarding.baligh.unknown")}
             </Label>
           </div>
           {branch === "unknown" && (
             <p className="ml-6 text-xs text-muted-foreground">
-              Using age 15 — the default most scholars apply when uncertain.
+              {t("onboarding.baligh.unknownNote")}
             </p>
           )}
 
@@ -136,10 +138,10 @@ export default function Baligh() {
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/onboarding/basics")} className="flex-1">
-          Back
+          {t("common.back")}
         </Button>
         <Button onClick={handleNext} className="flex-1">
-          Next
+          {t("common.next")}
         </Button>
       </div>
     </Card>

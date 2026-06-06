@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { Card } from "~/components/ui/card"
 import { FastingPhaseCard } from "~/components/onboarding/PhaseEditor"
@@ -24,6 +25,7 @@ function getOnboardingData() {
 
 export default function Fasting() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const data = getOnboardingData()
   const balighYear = (data.birthYear ?? currentYear - 25) + (data.balighAge ?? 15)
   const fastingStart = data.fastingStartAge
@@ -66,9 +68,9 @@ export default function Fasting() {
   return (
     <div className="max-w-md mx-auto space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Fasting Phases</h1>
+        <h1 className="text-2xl font-bold">{t("onboarding.fasting.title")}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          How many Ramadan days did you miss per year?
+          {t("onboarding.fasting.subtitle")}
         </p>
       </div>
 
@@ -86,23 +88,23 @@ export default function Fasting() {
       </div>
 
       <Button variant="outline" className="w-full" onClick={addPhase}>
-        + Add phase
+        {t("onboarding.fasting.addPhase")}
       </Button>
 
       {totalDays > 0 && (
         <Card className="p-4 bg-muted/30">
-          <p className="text-sm text-muted-foreground">Estimated total</p>
+          <p className="text-sm text-muted-foreground">{t("onboarding.fasting.estimatedTotal")}</p>
           <p className="text-2xl font-bold">{totalDays.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">days of fasting to make up</p>
+          <p className="text-xs text-muted-foreground">{t("onboarding.fasting.daysToMakeUp")}</p>
         </Card>
       )}
 
       <div className="flex gap-3 pt-2">
         <Button variant="outline" onClick={() => navigate("/onboarding/prayers")} className="flex-1">
-          Back
+          {t("common.back")}
         </Button>
         <Button onClick={handleNext} className="flex-1">
-          Next
+          {t("common.next")}
         </Button>
       </div>
     </div>
