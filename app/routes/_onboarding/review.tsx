@@ -48,12 +48,18 @@ export default function Review() {
 
       const uid = session.user.id
 
-      // Personal data stays local only — not sent to DB
+      // All personal + phase data stays local only — not sent to DB
       saveLocalProfile({
         gender: data.gender ?? "male",
+        birthYear: data.birthYear,
+        balighAge: data.balighAge,
+        balighCertain: data.balighCertain,
         avgCycleDays: data.avgCycleDays,
         avgPeriodDays: data.avgPeriodDays,
         avgPeriodInRamadan: data.avgPeriodInRamadan,
+        prayerPhases: prayerDirectCounts ? null : prayerPhases,
+        prayerDirectCounts: prayerDirectCounts ?? null,
+        fastingPhases,
       })
 
       // 1. Upsert profile
@@ -61,9 +67,6 @@ export default function Review() {
         .from("profiles")
         .upsert({
           user_id: uid,
-          birth_year: data.birthYear ?? new Date().getFullYear() - 25,
-          baligh_age: data.balighAge ?? 15,
-          baligh_certain: data.balighCertain ?? false,
           locale: "id",
           timezone: "Asia/Jakarta",
           onboarded_at: new Date().toISOString(),
@@ -73,9 +76,8 @@ export default function Review() {
       if (profileErr) throw profileErr
       if (!updatedProfile?.onboarded_at) throw new Error("Profile save failed — please try again.")
 
-      // 2. Prayer baselines
+      // 2. Prayer baselines — direct to ledger, no phase rows
       if (prayerDirectCounts) {
-        // New path: insert ledger rows directly, no prayer_phases row
         const rows = PRAYERS
           .filter((p) => (prayerDirectCounts[p] ?? 0) > 0)
           .map((prayer) => ({
@@ -89,61 +91,31 @@ export default function Review() {
           if (ledgerErr) throw ledgerErr
         }
       } else {
-        // Legacy path: insert prayer_phases + ledger rows per phase
-        for (const phase of prayerPhases) {
-          const { data: inserted, error: phaseErr } = await supabase
-            .from("prayer_phases")
-            .insert({
-              user_id: uid,
-              start_year: phase.startYear,
-              end_year: phase.endYear,
-              pattern: phase.pattern,
-              missed_pct: phase.missedPct,
-            })
-            .select("id")
-            .single()
-          if (phaseErr) throw phaseErr
-
+        const prayerRows = prayerPhases.flatMap((phase) => {
           const baseline = prayerBaselineForPhase(phase, profile)
-          if (baseline > 0) {
-            const ledgerRows = PRAYERS.map((prayer) => ({
-              user_id: uid,
-              prayer,
-              entry_type: "baseline" as const,
-              amount: baseline,
-              source_phase_id: inserted.id,
-            }))
-            const { error: ledgerErr } = await supabase.from("prayer_ledger").insert(ledgerRows)
-            if (ledgerErr) throw ledgerErr
-          }
+          if (baseline <= 0) return []
+          return PRAYERS.map((prayer) => ({
+            user_id: uid,
+            prayer,
+            entry_type: "baseline" as const,
+            amount: baseline,
+          }))
+        })
+        if (prayerRows.length > 0) {
+          const { error: ledgerErr } = await supabase.from("prayer_ledger").insert(prayerRows)
+          if (ledgerErr) throw ledgerErr
         }
       }
 
-      // 3. Fasting phases + baseline ledger entries
-      for (const phase of fastingPhases) {
-        const { data: inserted, error: phaseErr } = await supabase
-          .from("fasting_phases")
-          .insert({
-            user_id: uid,
-            start_year: phase.startYear,
-            end_year: phase.endYear,
-            pattern: phase.pattern,
-            days_missed_per_ramadan: phase.daysMissedPerRamadan,
-          })
-          .select("id")
-          .single()
-        if (phaseErr) throw phaseErr
-
+      // 3. Fasting baselines — direct to ledger, no phase rows
+      const fastingRows = fastingPhases.flatMap((phase) => {
         const baseline = fastingBaselineForPhase(phase, profile)
-        if (baseline > 0) {
-          const { error: ledgerErr } = await supabase.from("fasting_ledger").insert({
-            user_id: uid,
-            entry_type: "baseline",
-            amount: baseline,
-            source_phase_id: inserted.id,
-          })
-          if (ledgerErr) throw ledgerErr
-        }
+        if (baseline <= 0) return []
+        return [{ user_id: uid, entry_type: "baseline" as const, amount: baseline }]
+      })
+      if (fastingRows.length > 0) {
+        const { error: ledgerErr } = await supabase.from("fasting_ledger").insert(fastingRows)
+        if (ledgerErr) throw ledgerErr
       }
 
       sessionStorage.removeItem("onboarding")

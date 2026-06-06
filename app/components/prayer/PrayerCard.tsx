@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { format, eachDayOfInterval } from "date-fns"
 import type { DateRange } from "react-day-picker"
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, Undo2 } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
 import { Calendar } from "~/components/ui/calendar"
-import { usePrayerLog } from "~/lib/queries/use-log-mutation"
+import { usePrayerLog, useUndoTodayPrayerLog } from "~/lib/queries/use-log-mutation"
 import type { Prayer } from "~/lib/queries/use-remaining"
 
 const PRAYER_LABELS: Record<Prayer, string> = {
@@ -26,6 +26,7 @@ export function PrayerCard({ prayer, remaining, loggedToday }: PrayerCardProps) 
   const [open, setOpen] = useState(false)
   const [range, setRange] = useState<DateRange | undefined>()
   const log = usePrayerLog()
+  const undo = useUndoTodayPrayerLog()
 
   const days = range?.from
     ? eachDayOfInterval({ start: range.from, end: range.to ?? range.from })
@@ -71,6 +72,16 @@ export function PrayerCard({ prayer, remaining, loggedToday }: PrayerCardProps) 
           <span className="flex items-center gap-1 text-xs text-primary font-medium">
             <CheckCircle2 className="h-4 w-4" />
             Today
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-5 w-5 ml-0.5 text-muted-foreground hover:text-destructive"
+              disabled={undo.isPending}
+              onClick={() => undo.mutate({ prayer })}
+              title="Undo today's log"
+            >
+              <Undo2 className="h-3 w-3" />
+            </Button>
           </span>
         )}
         <Sheet open={open} onOpenChange={setOpen}>

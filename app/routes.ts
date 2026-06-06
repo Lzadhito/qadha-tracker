@@ -28,7 +28,6 @@ export default [
     ]),
     route("settings", "routes/_app/settings/layout.tsx", [
       index("routes/_app/settings/index.tsx"),
-      route("phases", "routes/_app/settings/phases.tsx"),
       route("data", "routes/_app/settings/data.tsx"),
       route("about", "routes/_app/settings/about.tsx"),
     ]),

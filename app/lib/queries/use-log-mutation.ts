@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { supabase } from "~/lib/supabase"
-import { PRAYERS } from "./use-remaining"
+import { PRAYERS, getRemainingPrayers, wibDateStr } from "./use-remaining"
 import type { Prayer } from "./use-remaining"
 
 interface FastingLogPayload {
@@ -157,6 +157,58 @@ export function usePrayerFullDayLog() {
   })
 }
 
+export function useLogRemainingToday() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ exclude, loggedDates }: { exclude: Set<Prayer>; loggedDates?: string[] }) => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error("Not authenticated")
+      const toLog = getRemainingPrayers(exclude)
+      if (toLog.length === 0) return
+      const rows = loggedDates
+        ? loggedDates.flatMap((loggedAt) =>
+            toLog.map((prayer) => ({
+              user_id: session.user.id,
+              prayer,
+              entry_type: "qadha" as const,
+              amount: -1,
+              logged_at: loggedAt,
+            }))
+          )
+        : toLog.map((prayer) => ({
+            user_id: session.user.id,
+            prayer,
+            entry_type: "qadha" as const,
+            amount: -1,
+          }))
+      const { error } = await supabase.from("prayer_ledger").insert(rows)
+      if (error) throw error
+    },
+    onMutate: async ({ exclude, loggedDates }) => {
+      const numDays = loggedDates?.length ?? 1
+      const toLog = getRemainingPrayers(exclude)
+      await qc.cancelQueries({ queryKey: ["prayer-remaining"] })
+      const previous = qc.getQueryData(["prayer-remaining"])
+      qc.setQueryData(["prayer-remaining"], (old: any[]) =>
+        old?.map((r) =>
+          toLog.includes(r.prayer as Prayer)
+            ? { ...r, remaining: r.remaining - numDays, displayRemaining: Math.max(0, r.remaining - numDays) }
+            : r
+        )
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(["prayer-remaining"], ctx.previous)
+      toast.error("Failed to log. Try again.")
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["prayer-remaining"] })
+      qc.invalidateQueries({ queryKey: ["prayer-today"] })
+    },
+  })
+}
+
 export function usePrayerAdjust() {
   const qc = useQueryClient()
   return useMutation({
@@ -198,6 +250,53 @@ export function usePrayerAdjust() {
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["prayer-remaining"] })
+    },
+  })
+}
+
+export function useUndoTodayPrayerLog() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ prayer }: { prayer: Prayer }) => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error("Not authenticated")
+      const dateKey = wibDateStr()
+      const start = new Date(`${dateKey}T00:00:00+07:00`)
+      const end = new Date(`${dateKey}T23:59:59.999+07:00`)
+      const { data, error } = await supabase
+        .from("prayer_ledger")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .eq("prayer", prayer)
+        .eq("entry_type", "qadha")
+        .gte("logged_at", start.toISOString())
+        .lte("logged_at", end.toISOString())
+        .order("logged_at", { ascending: false })
+        .limit(1)
+      if (error) throw error
+      if (!data?.length) return
+      const { error: deleteError } = await supabase.from("prayer_ledger").delete().eq("id", data[0].id)
+      if (deleteError) throw deleteError
+    },
+    onMutate: async ({ prayer }) => {
+      await qc.cancelQueries({ queryKey: ["prayer-remaining"] })
+      const previous = qc.getQueryData(["prayer-remaining"])
+      qc.setQueryData(["prayer-remaining"], (old: any[]) =>
+        old?.map((r) =>
+          r.prayer === prayer
+            ? { ...r, remaining: r.remaining + 1, displayRemaining: Math.max(0, r.remaining + 1) }
+            : r
+        )
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) qc.setQueryData(["prayer-remaining"], context.previous)
+      toast.error("Failed to undo. Try again.")
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["prayer-remaining"] })
+      qc.invalidateQueries({ queryKey: ["prayer-today"] })
     },
   })
 }

@@ -2,9 +2,9 @@ import { useState } from "react"
 import { requireOnboarded } from "~/lib/guards"
 import { PRAYERS, usePrayerRemaining, useFastingRemaining, useTodayPrayerLog } from "~/lib/queries/use-remaining"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
-import { TodayTracker } from "~/components/prayer/TodayTracker"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { FullDaySheet } from "~/components/prayer/FullDaySheet"
+import { RemainingSheet } from "~/components/prayer/RemainingSheet"
 import { AdjustSheet } from "~/components/prayer/AdjustSheet"
 import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
@@ -37,7 +37,11 @@ export default function Log() {
   const fasting = useFastingRemaining()
   const todayLog = useTodayPrayerLog()
   const [fullDayOpen, setFullDayOpen] = useState(false)
+  const [remainingOpen, setRemainingOpen] = useState(false)
   const [adjustOpen, setAdjustOpen] = useState(false)
+
+  const todayDone = todayLog.data ?? new Set()
+  const remainingCount = PRAYERS.length - todayDone.size
 
   const prayerRemaining = prayers.data?.reduce((s, r) => s + r.remaining, 0) ?? 0
   const fastingRemaining = fasting.data?.displayRemaining ?? 0
@@ -56,8 +60,6 @@ export default function Log() {
       <p className="text-muted-foreground text-sm">{today}</p>
       <h1 className="text-xl font-bold mb-4">Daily Log</h1>
 
-      <TodayTracker />
-
       {(prayerSummary || fastingSummary) && (
         <div className="text-xs text-muted-foreground pb-1 space-y-0.5">
           {prayerSummary && <p>{prayerSummary} of prayer qadha left</p>}
@@ -66,23 +68,34 @@ export default function Log() {
       )}
 
       {!prayers.isLoading && !fasting.isLoading && (
-        <div className="flex gap-2 pb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-xs"
-            onClick={() => setFullDayOpen(true)}
-          >
-            +Qadha full day (all 5)
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-xs"
-            onClick={() => setAdjustOpen(true)}
-          >
-            Adjust remaining
-          </Button>
+        <div className="flex flex-col gap-2 pb-2">
+          {todayDone.size > 0 && remainingCount > 0 && (
+            <Button
+              size="sm"
+              className="w-full text-xs"
+              onClick={() => setRemainingOpen(true)}
+            >
+              +Qadha remaining {remainingCount} prayer{remainingCount > 1 ? "s" : ""} today
+            </Button>
+          )}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={() => setFullDayOpen(true)}
+            >
+              +Qadha full day (all 5)
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={() => setAdjustOpen(true)}
+            >
+              Adjust remaining
+            </Button>
+          </div>
         </div>
       )}
 
@@ -118,6 +131,11 @@ export default function Log() {
       </div>
 
       <FullDaySheet open={fullDayOpen} onOpenChange={setFullDayOpen} />
+      <RemainingSheet
+        open={remainingOpen}
+        onOpenChange={setRemainingOpen}
+        todayDone={todayDone}
+      />
       <AdjustSheet
         open={adjustOpen}
         onOpenChange={setAdjustOpen}

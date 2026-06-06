@@ -4,6 +4,10 @@ import { supabase } from "~/lib/supabase"
 export const PRAYERS = ["subuh", "zuhur", "asar", "maghrib", "isya"] as const
 export type Prayer = (typeof PRAYERS)[number]
 
+export function getRemainingPrayers(done: Set<Prayer>): Prayer[] {
+  return PRAYERS.filter((p) => !done.has(p))
+}
+
 export interface PrayerRemaining {
   prayer: Prayer
   remaining: number
@@ -37,7 +41,7 @@ export function usePrayerRemaining() {
   })
 }
 
-function wibDateStr(): string {
+export function wibDateStr(): string {
   const WIB_OFFSET = 7 * 60 * 60 * 1000
   const wib = new Date(Date.now() + WIB_OFFSET)
   return wib.toISOString().slice(0, 10)
@@ -63,6 +67,53 @@ export function useTodayPrayerLog() {
       return new Set((data ?? []).map((r: { prayer: string }) => r.prayer as Prayer))
     },
   })
+}
+
+export function useDatePrayerLog(dateKey: string | null) {
+  return useQuery({
+    queryKey: ["prayer-date", dateKey],
+    enabled: !!dateKey,
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error("Not authenticated")
+      const start = new Date(`${dateKey}T00:00:00+07:00`)
+      const end = new Date(`${dateKey}T23:59:59.999+07:00`)
+      const { data, error } = await supabase
+        .from("prayer_ledger")
+        .select("prayer")
+        .eq("user_id", session.user.id)
+        .eq("entry_type", "qadha")
+        .gte("logged_at", start.toISOString())
+        .lte("logged_at", end.toISOString())
+      if (error) throw error
+      return new Set((data ?? []).map((r: { prayer: string }) => r.prayer as Prayer))
+    },
+  })
+}
+
+export function resolveExclude({
+  rangeFrom,
+  rangeTo,
+  todayKey,
+  todayDone,
+  fetchedDone,
+}: {
+  rangeFrom: Date | undefined
+  rangeTo: Date | undefined
+  todayKey: string
+  todayDone: Set<Prayer>
+  fetchedDone: Set<Prayer> | undefined
+}): Set<Prayer> {
+  if (!rangeFrom) return todayDone
+  const isSingle = !rangeTo || (
+    rangeFrom.getFullYear() === rangeTo.getFullYear() &&
+    rangeFrom.getMonth() === rangeTo.getMonth() &&
+    rangeFrom.getDate() === rangeTo.getDate()
+  )
+  if (!isSingle) return new Set()
+  const dateKey = `${rangeFrom.getFullYear()}-${String(rangeFrom.getMonth() + 1).padStart(2, "0")}-${String(rangeFrom.getDate()).padStart(2, "0")}`
+  if (dateKey === todayKey) return todayDone
+  return fetchedDone ?? new Set()
 }
 
 export function useFastingRemaining() {

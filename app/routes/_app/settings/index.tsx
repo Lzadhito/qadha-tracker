@@ -19,7 +19,6 @@ export async function clientLoader() {
 }
 
 const LINKS = [
-  { href: "/settings/phases", label: "My Phases" },
   { href: "/settings/data", label: "Data & Privacy" },
   { href: "/settings/about", label: "About" },
 ]

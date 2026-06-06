@@ -1,0 +1,126 @@
+import { useState } from "react"
+import { format, isSameDay, eachDayOfInterval } from "date-fns"
+import type { DateRange } from "react-day-picker"
+import { Button } from "~/components/ui/button"
+import { Calendar } from "~/components/ui/calendar"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
+import { useLogRemainingToday } from "~/lib/queries/use-log-mutation"
+import { PRAYERS, getRemainingPrayers, resolveExclude, useDatePrayerLog, wibDateStr } from "~/lib/queries/use-remaining"
+import type { Prayer } from "~/lib/queries/use-remaining"
+
+interface RemainingSheetProps {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  todayDone: Set<Prayer>
+}
+
+function formatDate(d: Date) {
+  return format(d, "yyyy-MM-dd")
+}
+
+export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheetProps) {
+  const [range, setRange] = useState<DateRange | undefined>()
+  const log = useLogRemainingToday()
+
+  // Determine if a single past date is selected
+  const singleFrom = range?.from
+  const singleTo = range?.to
+  const isSingleDate = singleFrom && (!singleTo || isSameDay(singleFrom, singleTo))
+  const isToday = isSingleDate && formatDate(singleFrom) === wibDateStr()
+
+  // For single past date, fetch what's already logged on that date
+  const pickedDateKey = isSingleDate && !isToday ? formatDate(singleFrom) : null
+  const dateLog = useDatePrayerLog(pickedDateKey)
+
+  const exclude = resolveExclude({
+    rangeFrom: range?.from,
+    rangeTo: range?.to,
+    todayKey: wibDateStr(),
+    todayDone,
+    fetchedDone: dateLog.data,
+  })
+
+  const remaining = getRemainingPrayers(exclude)
+  const remainingCount = isSingleDate ? remaining.length : PRAYERS.length
+
+  const isLoading = !!pickedDateKey && dateLog.isLoading
+
+  const logDays = (dates?: DateRange) => {
+    let loggedDates: string[] | undefined
+    if (dates?.from) {
+      const dayList = eachDayOfInterval({ start: dates.from, end: dates.to ?? dates.from })
+      loggedDates = dayList.map((d) => {
+        const local = new Date(d)
+        local.setHours(12, 0, 0, 0)
+        return local.toISOString()
+      })
+    }
+    log.mutate({ exclude, loggedDates }, {
+      onSuccess: () => {
+        onOpenChange(false)
+        setRange(undefined)
+      },
+    })
+  }
+
+  const rangeLabel = () => {
+    if (!range?.from) return "Select date(s) above"
+    const count = isSingleDate
+      ? remainingCount
+      : eachDayOfInterval({ start: range.from, end: range.to ?? range.from }).length * PRAYERS.length
+    if (isSingleDate) {
+      return `Log ${remainingCount} prayer${remainingCount !== 1 ? "s" : ""} for ${format(range.from, "d MMM yyyy")}`
+    }
+    return `Log all prayers for ${format(range.from, "d MMM")} – ${format(range.to!, "d MMM yyyy")} (${count} entries)`
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setRange(undefined) }}>
+      <SheetContent side="bottom">
+        <SheetHeader>
+          <SheetTitle>
+            +Qadha remaining {remainingCount} prayer{remainingCount !== 1 ? "s" : ""}
+          </SheetTitle>
+        </SheetHeader>
+        <div className="py-4 space-y-3 px-4">
+          {!range?.from && (
+            <Button className="w-full" onClick={() => logDays()} disabled={log.isPending}>
+              Right now ({getRemainingPrayers(todayDone).length} remaining today)
+            </Button>
+          )}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 border-t border-border" />
+            <span className="text-xs text-muted-foreground">or pick a date</span>
+            <div className="flex-1 border-t border-border" />
+          </div>
+          <Calendar
+            mode="range"
+            selected={range}
+            onSelect={setRange}
+            disabled={(d) => d > new Date()}
+            className="mx-auto"
+          />
+          {range?.from && (
+            <>
+              {isLoading && (
+                <p className="text-xs text-muted-foreground text-center">Checking logged prayers…</p>
+              )}
+              {!isLoading && isSingleDate && remainingCount === 0 && (
+                <p className="text-xs text-muted-foreground text-center">All prayers already logged for this day.</p>
+              )}
+              {!isLoading && (remainingCount > 0 || !isSingleDate) && (
+                <Button
+                  className="w-full"
+                  disabled={log.isPending || isLoading}
+                  onClick={() => logDays(range)}
+                >
+                  {rangeLabel()}
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}

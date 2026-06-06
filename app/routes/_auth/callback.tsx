@@ -12,8 +12,6 @@ async function resolvePostAuth(userId: string) {
   if (!profile) {
     await supabase.from("profiles").insert({
       user_id: userId,
-      birth_year: new Date().getFullYear() - 25,
-      gender: "male",
       locale: "id",
       timezone: "Asia/Jakarta",
     })
