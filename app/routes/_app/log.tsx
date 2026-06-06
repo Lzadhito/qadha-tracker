@@ -2,6 +2,7 @@ import { useState } from "react"
 import { requireOnboarded } from "~/lib/guards"
 import { PRAYERS, usePrayerRemaining, useFastingRemaining, useTodayPrayerLog } from "~/lib/queries/use-remaining"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
+import { TodayTracker } from "~/components/prayer/TodayTracker"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { FullDaySheet } from "~/components/prayer/FullDaySheet"
 import { AdjustSheet } from "~/components/prayer/AdjustSheet"
@@ -54,6 +55,8 @@ export default function Log() {
     <div className="max-w-lg mx-auto px-4 py-6 space-y-2">
       <p className="text-muted-foreground text-sm">{today}</p>
       <h1 className="text-xl font-bold mb-4">Daily Log</h1>
+
+      <TodayTracker />
 
       {(prayerSummary || fastingSummary) && (
         <div className="text-xs text-muted-foreground pb-1 space-y-0.5">

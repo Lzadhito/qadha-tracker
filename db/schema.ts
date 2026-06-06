@@ -11,18 +11,14 @@ import {
 import { sql } from "drizzle-orm"
 
 // Profiles: extends auth.users with app-specific data
+// Personal data (gender, menstrual, name) is stored in localStorage only — not here.
 export const profiles = pgTable(
   "profiles",
   {
     userId: uuid("user_id").primaryKey(),
-    displayName: text("display_name"),
     birthYear: integer("birth_year").notNull(),
     balighAge: integer("baligh_age").notNull().default(15),
     balighCertain: boolean("baligh_certain").notNull().default(false),
-    gender: text("gender").notNull(),
-    avgCycleDays: integer("avg_cycle_days"),
-    avgPeriodDays: integer("avg_period_days"),
-    avgPeriodInRamadan: integer("avg_period_in_ramadan"),
     fastingStartAge: integer("fasting_start_age"),
     madhab: text("madhab"),
     intentStacking: boolean("intent_stacking").notNull().default(false),
@@ -34,7 +30,6 @@ export const profiles = pgTable(
       .defaultNow(),
   },
   (table) => ({
-    genderCheck: check("gender_check", sql`${table.gender} in ('male','female')`),
     madhaBCheck: check(
       "madhab_check",
       sql`${table.madhab} in ('shafii','hanafi','maliki','hanbali')`

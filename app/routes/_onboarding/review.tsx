@@ -3,6 +3,7 @@ import { useNavigate } from "react-router"
 import { Button } from "~/components/ui/button"
 import { Card } from "~/components/ui/card"
 import { supabase } from "~/lib/supabase"
+import { saveLocalProfile } from "~/lib/local-profile"
 import { prayerBaselineForPhase, fastingBaselineForPhase } from "~/lib/calculations"
 import type { PrayerPhaseData, FastingPhaseData } from "~/components/onboarding/PhaseEditor"
 
@@ -47,18 +48,22 @@ export default function Review() {
 
       const uid = session.user.id
 
+      // Personal data stays local only — not sent to DB
+      saveLocalProfile({
+        gender: data.gender ?? "male",
+        avgCycleDays: data.avgCycleDays,
+        avgPeriodDays: data.avgPeriodDays,
+        avgPeriodInRamadan: data.avgPeriodInRamadan,
+      })
+
       // 1. Upsert profile
       const { error: profileErr, data: updatedProfile } = await supabase
         .from("profiles")
         .upsert({
           user_id: uid,
           birth_year: data.birthYear ?? new Date().getFullYear() - 25,
-          gender: data.gender ?? "male",
           baligh_age: data.balighAge ?? 15,
           baligh_certain: data.balighCertain ?? false,
-          avg_cycle_days: data.avgCycleDays ?? null,
-          avg_period_days: data.avgPeriodDays ?? null,
-          avg_period_in_ramadan: data.avgPeriodInRamadan ?? null,
           locale: "id",
           timezone: "Asia/Jakarta",
           onboarded_at: new Date().toISOString(),
