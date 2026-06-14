@@ -37,6 +37,12 @@
     "day_one": "{{count}} hari",
     "day_other": "{{count}} hari"
   },
+  "nav": {
+    "log": "Log",
+    "history": "Riwayat",
+    "settings": "Pengaturan",
+    "brand": "Qadha Tracker"
+  },
   "log": {
     "title": "Catatan Harian",
     "prayerLeft": "Sisa qadha shalat {{duration}}",
@@ -47,7 +53,7 @@
     "adjustRemaining": "Sesuaikan sisa"
   },
   "prayerCard": {
-    "remaining": "{{count}} tersisa",
+    "remaining": "{{duration}} tersisa",
     "allPaidOff": "Lunas semua",
     "today": "Hari ini",
     "undoTitle": "Batalkan catatan hari ini",
@@ -80,7 +86,7 @@
     "selectDates": "Pilih tanggal di atas",
     "logForDate_one": "Catat {{count}} shalat untuk {{date}}",
     "logForDate_other": "Catat {{count}} shalat untuk {{date}}",
-    "logAllRange": "Catat semua shalat untuk {{from}} – {{to}} ({{count}} entri)"
+    "logAllRange": "Catat semua shalat untuk {{from}} – {{to}} ({{count}} hari)"
   },
   "fullDay": {
     "title": "Catat satu hari penuh — semua 5 shalat",

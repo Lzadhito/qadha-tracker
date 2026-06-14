@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { format, eachDayOfInterval } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { Button } from "~/components/ui/button"
@@ -12,6 +13,7 @@ interface FullDaySheetProps {
 }
 
 export function FullDaySheet({ open, onOpenChange }: FullDaySheetProps) {
+  const { t } = useTranslation()
   const [range, setRange] = useState<DateRange | undefined>()
   const log = usePrayerFullDayLog()
 
@@ -38,29 +40,29 @@ export function FullDaySheet({ open, onOpenChange }: FullDaySheetProps) {
   }
 
   const rangeLabel = () => {
-    if (!range?.from) return "Select date(s) above"
+    if (!range?.from) return t("fullDay.selectDates")
     if (!range.to || format(range.from, "yyyy-MM-dd") === format(range.to, "yyyy-MM-dd")) {
-      return `Log for ${format(range.from, "d MMM yyyy")}`
+      return t("fullDay.logFor", { date: format(range.from, "d MMM yyyy") })
     }
-    return `Log ${format(range.from, "d MMM")} – ${format(range.to, "d MMM yyyy")} (${days.length} days)`
+    return t("fullDay.logRange", { from: format(range.from, "d MMM"), to: format(range.to, "d MMM yyyy"), count: days.length })
   }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom">
         <SheetHeader>
-          <SheetTitle>Log full day — all 5 prayers</SheetTitle>
+          <SheetTitle>{t("fullDay.title")}</SheetTitle>
         </SheetHeader>
         <div className="py-4 space-y-3 px-4">
           <p className="text-xs text-muted-foreground">
-            Logs 1 qadha for Fajr, Dhuhr, Asr, Maghrib, and Isha for each selected day.
+            {t("fullDay.desc")}
           </p>
           <Button className="w-full" onClick={() => logDays()} disabled={log.isPending}>
-            Today (right now)
+            {t("fullDay.todayNow")}
           </Button>
           <div className="flex items-center gap-3">
             <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground">or choose date(s)</span>
+            <span className="text-xs text-muted-foreground">{t("fullDay.orChooseDates")}</span>
             <div className="flex-1 border-t border-border" />
           </div>
           <Calendar

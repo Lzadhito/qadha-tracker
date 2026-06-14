@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { format } from "date-fns"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
@@ -17,6 +18,7 @@ interface FastingCardProps {
 }
 
 export function FastingCard({ remaining }: FastingCardProps) {
+  const { t } = useTranslation()
   const [qadhaOpen, setQadhaOpen] = useState(false)
   const [qadhaDate, setQadhaDate] = useState<Date | undefined>()
   const [qadhaTime, setQadhaTime] = useState("12:00")
@@ -40,8 +42,8 @@ export function FastingCard({ remaining }: FastingCardProps) {
   if (remaining <= 0) {
     return (
       <div className="flex items-center justify-between py-3 px-1">
-        <span className="font-medium text-sm">Fasting</span>
-        <span className="text-primary text-sm">Done 🌙</span>
+        <span className="font-medium text-sm">{t("fastingCard.label")}</span>
+        <span className="text-primary text-sm">{t("fastingCard.done")}</span>
       </div>
     )
   }
@@ -50,26 +52,26 @@ export function FastingCard({ remaining }: FastingCardProps) {
     <div className="py-3 px-1">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <p className="font-medium text-sm">Fasting</p>
-          <p className="text-muted-foreground text-xs">{remaining.toLocaleString()} days remaining</p>
+          <p className="font-medium text-sm">{t("fastingCard.label")}</p>
+          <p className="text-muted-foreground text-xs">{t("fastingCard.daysRemaining", { count: remaining })}</p>
         </div>
         <Button size="sm" onClick={() => setQadhaOpen(true)} disabled={log.isPending} className="h-9 min-w-[90px]">
-          Log 1 Fast
+          {t("fastingCard.log1Fast")}
         </Button>
       </div>
 
       <Sheet open={qadhaOpen} onOpenChange={setQadhaOpen}>
         <SheetContent side="bottom">
           <SheetHeader>
-            <SheetTitle>When did you fast this qadha?</SheetTitle>
+            <SheetTitle>{t("fastingCard.whenFast")}</SheetTitle>
           </SheetHeader>
           <div className="py-4 space-y-3 px-4">
             <Button className="w-full" onClick={() => logQadha()}>
-              Right now
+              {t("common.rightNow")}
             </Button>
             <div className="flex items-center gap-3">
               <div className="flex-1 border-t border-border" />
-              <span className="text-xs text-muted-foreground">or choose date & time</span>
+              <span className="text-xs text-muted-foreground">{t("fastingCard.orChooseDateTime")}</span>
               <div className="flex-1 border-t border-border" />
             </div>
             <Calendar
@@ -81,7 +83,7 @@ export function FastingCard({ remaining }: FastingCardProps) {
             />
             {qadhaDate && (
               <div className="space-y-1">
-                <Label className="text-xs">Time</Label>
+                <Label className="text-xs">{t("fastingCard.time")}</Label>
                 <Input type="time" value={qadhaTime} onChange={(e) => setQadhaTime(e.target.value)} />
               </div>
             )}
@@ -91,7 +93,7 @@ export function FastingCard({ remaining }: FastingCardProps) {
               disabled={!qadhaDate || log.isPending}
               onClick={() => qadhaDate && logQadha(qadhaDate, qadhaTime)}
             >
-              {qadhaDate ? `Log for ${format(qadhaDate, "d MMM yyyy")} at ${qadhaTime}` : "Select a date above"}
+              {qadhaDate ? t("fastingCard.logForAt", { date: format(qadhaDate, "d MMM yyyy"), time: qadhaTime }) : t("fastingCard.selectDateAbove")}
             </Button>
           </div>
         </SheetContent>

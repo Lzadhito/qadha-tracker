@@ -1,7 +1,9 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
+import { useTranslation } from "react-i18next"
 import { requireOnboarded } from "~/lib/guards"
 import { supabase } from "~/lib/supabase"
+import { getLocalProfile } from "~/lib/local-profile"
 import { Button } from "~/components/ui/button"
 import {
   AlertDialog,
@@ -21,6 +23,7 @@ export async function clientLoader() {
 
 export default function Data() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [exporting, setExporting] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -31,22 +34,19 @@ export default function Data() {
       if (!session) return
 
       const uid = session.user.id
-      const [profile, prayerPhases, prayerLedger, fastingPhases, fastingLedger] =
+      const [profile, prayerLedger, fastingLedger] =
         await Promise.all([
           supabase.from("profiles").select("*").eq("user_id", uid).single(),
-          supabase.from("prayer_phases").select("*").eq("user_id", uid),
           supabase.from("prayer_ledger").select("*").eq("user_id", uid),
-          supabase.from("fasting_phases").select("*").eq("user_id", uid),
           supabase.from("fasting_ledger").select("*").eq("user_id", uid),
         ])
 
       const json = JSON.stringify(
         {
           exported_at: new Date().toISOString(),
+          local_profile: getLocalProfile(),
           profile: profile.data,
-          prayer_phases: prayerPhases.data,
           prayer_ledger: prayerLedger.data,
-          fasting_phases: fastingPhases.data,
           fasting_ledger: fastingLedger.data,
         },
         null,
@@ -89,15 +89,15 @@ export default function Data() {
           onClick={() => navigate("/settings")}
           className="mb-4"
         >
-          ← Back
+          ← {t("common.back")}
         </Button>
-        <h1 className="text-xl font-bold">Data & Privacy</h1>
+        <h1 className="text-xl font-bold">{t("data.title")}</h1>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4 space-y-2 text-sm text-muted-foreground">
-        <p>We store your prayer and fasting counts, phase configuration, and basic profile. Nothing else.</p>
-        <p>We never ask why a prayer or fast was missed. No notes. No tracking. That is between you and Allah.</p>
-        <p>Your data is encrypted at rest. Only you can read it.</p>
+        <p>{t("data.intro1")}</p>
+        <p>{t("data.intro2")}</p>
+        <p>{t("data.intro3")}</p>
       </div>
 
       <Button
@@ -106,30 +106,30 @@ export default function Data() {
         onClick={handleExport}
         disabled={exporting}
       >
-        {exporting ? "Exporting..." : "Export all data (JSON)"}
+        {exporting ? t("data.exporting") : t("data.export")}
       </Button>
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="outline" className="w-full text-destructive border-destructive/50 hover:bg-destructive/10">
-            Delete account & all data
+            {t("data.deleteAccount")}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete account?</AlertDialogTitle>
+            <AlertDialogTitle>{t("data.deleteConfirm")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently deletes your account and all data — prayers, fasts, phases, profile. This cannot be undone.
+              {t("data.deleteDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAccount}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? "Deleting..." : "Delete everything"}
+              {deleting ? t("data.deleting") : t("data.deleteEverything")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

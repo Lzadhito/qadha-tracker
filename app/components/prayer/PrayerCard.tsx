@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { format, eachDayOfInterval } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { CheckCircle2, Undo2 } from "lucide-react"
@@ -6,7 +7,7 @@ import { Button } from "~/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
 import { Calendar } from "~/components/ui/calendar"
 import { usePrayerLog, useUndoTodayPrayerLog } from "~/lib/queries/use-log-mutation"
-import { PRAYER_LABELS } from "~/lib/format"
+import { formatDaysLeft } from "~/lib/format"
 import type { Prayer } from "~/lib/queries/use-remaining"
 
 interface PrayerCardProps {
@@ -16,10 +17,12 @@ interface PrayerCardProps {
 }
 
 export function PrayerCard({ prayer, remaining, loggedToday }: PrayerCardProps) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [range, setRange] = useState<DateRange | undefined>()
   const log = usePrayerLog()
   const undo = useUndoTodayPrayerLog()
+  const prayerName = t(`prayers.${prayer}`)
 
   const days = range?.from
     ? eachDayOfInterval({ start: range.from, end: range.to ?? range.from })
@@ -44,19 +47,21 @@ export function PrayerCard({ prayer, remaining, loggedToday }: PrayerCardProps) 
   }
 
   const rangeLabel = () => {
-    if (!range?.from) return "Select date(s) above"
+    if (!range?.from) return t("prayerCard.selectDates")
     if (!range.to || format(range.from, "yyyy-MM-dd") === format(range.to, "yyyy-MM-dd")) {
-      return `Log for ${format(range.from, "d MMM yyyy")}`
+      return t("prayerCard.logFor", { date: format(range.from, "d MMM yyyy") })
     }
-    return `Log ${format(range.from, "d MMM")} – ${format(range.to, "d MMM yyyy")} (${days.length} days)`
+    return t("prayerCard.logRange", { from: format(range.from, "d MMM"), to: format(range.to, "d MMM yyyy"), count: days.length })
   }
 
   return (
     <div className="flex items-center justify-between py-3 px-1 border-b border-border/40 last:border-0">
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-sm">{PRAYER_LABELS[prayer]}</p>
+        <p className="font-medium text-sm">{prayerName}</p>
         <p className="text-muted-foreground text-xs">
-          {remaining > 0 ? `${remaining.toLocaleString()} remaining` : "All paid off"}
+          {remaining > 0
+            ? t("prayerCard.remaining", { duration: formatDaysLeft(remaining, t) })
+            : t("prayerCard.allPaidOff")}
         </p>
       </div>
 
@@ -64,14 +69,14 @@ export function PrayerCard({ prayer, remaining, loggedToday }: PrayerCardProps) 
         {loggedToday && (
           <span className="flex items-center gap-1 text-xs text-primary font-medium">
             <CheckCircle2 className="h-4 w-4" />
-            Today
+            {t("prayerCard.today")}
             <Button
               size="icon"
               variant="ghost"
               className="h-5 w-5 ml-0.5 text-muted-foreground hover:text-destructive"
               disabled={undo.isPending}
               onClick={() => undo.mutate({ prayer })}
-              title="Undo today's log"
+              title={t("prayerCard.undoTitle")}
             >
               <Undo2 className="h-3 w-3" />
             </Button>
@@ -85,22 +90,22 @@ export function PrayerCard({ prayer, remaining, loggedToday }: PrayerCardProps) 
             className="h-9 min-w-[80px]"
             onClick={() => setOpen(true)}
           >
-            +Qadha
+            {t("prayerCard.qadha")}
           </Button>
           <SheetContent side="bottom">
             <SheetHeader>
-              <SheetTitle>When did you qadha {PRAYER_LABELS[prayer]}?</SheetTitle>
+              <SheetTitle>{t("prayerCard.whenDidYou", { prayer: prayerName })}</SheetTitle>
             </SheetHeader>
             <div className="py-4 space-y-3 px-4">
               <p className="text-xs text-muted-foreground">
-                Select a single day or drag to pick a range.
+                {t("prayerCard.selectOrDrag")}
               </p>
               <Button className="w-full" onClick={() => logQadha()} disabled={log.isPending}>
-                Right now
+                {t("common.rightNow")}
               </Button>
               <div className="flex items-center gap-3">
                 <div className="flex-1 border-t border-border" />
-                <span className="text-xs text-muted-foreground">or choose date(s)</span>
+                <span className="text-xs text-muted-foreground">{t("prayerCard.orChooseDates")}</span>
                 <div className="flex-1 border-t border-border" />
               </div>
               <Calendar

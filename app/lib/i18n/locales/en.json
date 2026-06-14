@@ -37,6 +37,12 @@
     "day_one": "{{count}} day",
     "day_other": "{{count}} days"
   },
+  "nav": {
+    "log": "Log",
+    "history": "History",
+    "settings": "Settings",
+    "brand": "Qadha Tracker"
+  },
   "log": {
     "title": "Daily Log",
     "prayerLeft": "{{duration}} of prayer qadha left",
@@ -47,7 +53,7 @@
     "adjustRemaining": "Adjust remaining"
   },
   "prayerCard": {
-    "remaining": "{{count}} remaining",
+    "remaining": "{{duration}} remaining",
     "allPaidOff": "All paid off",
     "today": "Today",
     "undoTitle": "Undo today's log",
@@ -80,7 +86,7 @@
     "selectDates": "Select date(s) above",
     "logForDate_one": "Log {{count}} prayer for {{date}}",
     "logForDate_other": "Log {{count}} prayers for {{date}}",
-    "logAllRange": "Log all prayers for {{from}} – {{to}} ({{count}} entries)"
+    "logAllRange": "Log all prayers for {{from}} – {{to}} ({{count}} days)"
   },
   "fullDay": {
     "title": "Log full day — all 5 prayers",

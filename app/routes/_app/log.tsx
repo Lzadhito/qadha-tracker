@@ -1,7 +1,8 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { requireOnboarded } from "~/lib/guards"
 import { PRAYERS, usePrayerRemaining, useFastingRemaining, useTodayPrayerLog } from "~/lib/queries/use-remaining"
-import { formatTodayDate } from "~/lib/format"
+import { formatTodayDate, formatDaysLeft } from "~/lib/format"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { FullDaySheet } from "~/components/prayer/FullDaySheet"
@@ -15,25 +16,8 @@ export async function clientLoader() {
   return requireOnboarded()
 }
 
-function formatPrayerLeft(days: number): string | null {
-  if (days <= 0) return null
-  const years = Math.floor(days / 365)
-  const afterYears = days - years * 365
-  const months = Math.floor(afterYears / 30)
-  const d = afterYears - months * 30
-  const parts: string[] = []
-  if (years > 0) parts.push(`${years} year${years > 1 ? "s" : ""}`)
-  if (months > 0) parts.push(`${months} month${months > 1 ? "s" : ""}`)
-  if (d > 0 || parts.length === 0) parts.push(`${d} day${d !== 1 ? "s" : ""}`)
-  return parts.join(" ")
-}
-
-function formatFastingLeft(days: number): string | null {
-  if (days <= 0) return null
-  return `${days.toLocaleString()} day${days !== 1 ? "s" : ""}`
-}
-
 export default function Log() {
+  const { t } = useTranslation()
   const prayers = usePrayerRemaining()
   const fasting = useFastingRemaining()
   const todayLog = useTodayPrayerLog()
@@ -47,20 +31,23 @@ export default function Log() {
   const prayerRemaining = prayers.data?.reduce((s, r) => s + r.remaining, 0) ?? 0
   const fastingRemaining = fasting.data?.displayRemaining ?? 0
   const loaded = !prayers.isLoading && !fasting.isLoading
-  const prayerSummary = loaded ? formatPrayerLeft(Math.ceil(prayerRemaining / 5)) : null
-  const fastingSummary = loaded ? formatFastingLeft(fastingRemaining) : null
+  const prayerSummary = loaded ? formatDaysLeft(Math.ceil(prayerRemaining / 5), t) : null
+  const fastingSummary = loaded && fastingRemaining > 0 ? t("duration.day", { count: fastingRemaining }) : null
 
   const today = formatTodayDate()
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-2">
       <p className="text-muted-foreground text-sm">{today}</p>
-      <h1 className="text-xl font-bold mb-4">Daily Log</h1>
+      <h1 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <img src="/sujud.svg" className="h-6 w-6" alt="" />
+        {t("log.title")}
+      </h1>
 
       {(prayerSummary || fastingSummary) && (
         <div className="text-xs text-muted-foreground pb-1 space-y-0.5">
-          {prayerSummary && <p>{prayerSummary} of prayer qadha left</p>}
-          {fastingSummary && <p>{fastingSummary} of fasting qadha left</p>}
+          {prayerSummary && <p>{t("log.prayerLeft", { duration: prayerSummary })}</p>}
+          {fastingSummary && <p>{t("log.fastingLeft", { duration: fastingSummary })}</p>}
         </div>
       )}
 
@@ -72,7 +59,7 @@ export default function Log() {
               className="w-full text-xs"
               onClick={() => setRemainingOpen(true)}
             >
-              +Qadha remaining {remainingCount} prayer{remainingCount > 1 ? "s" : ""} today
+              {t("log.qadhaRemaining", { count: remainingCount })}
             </Button>
           )}
           <div className="flex gap-2">
@@ -82,7 +69,7 @@ export default function Log() {
               className="flex-1 text-xs"
               onClick={() => setFullDayOpen(true)}
             >
-              +Qadha full day (all 5)
+              {t("log.qadhaFullDay")}
             </Button>
             <Button
               variant="outline"
@@ -90,7 +77,7 @@ export default function Log() {
               className="flex-1 text-xs"
               onClick={() => setAdjustOpen(true)}
             >
-              Adjust remaining
+              {t("log.adjustRemaining")}
             </Button>
           </div>
         </div>

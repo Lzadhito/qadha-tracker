@@ -8,15 +8,22 @@ import {
 } from "react-router"
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query"
 import { ThemeProvider } from "next-themes"
+import { useTranslation } from "react-i18next"
 import { Toaster } from "~/components/ui/sonner"
-import i18n from "~/lib/i18n"
+import "~/lib/i18n"
 
 import type { Route } from "./+types/root"
 import "./app.css"
 
 const queryClient = new QueryClient()
 
+export const meta: Route.MetaFunction = () => [
+  { title: "Qadha Tracker" },
+  { name: "description", content: "Track your qadha prayers and fasts." },
+]
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { i18n } = useTranslation()
   return (
     <html lang={i18n.language ?? "en"} suppressHydrationWarning>
       <head>

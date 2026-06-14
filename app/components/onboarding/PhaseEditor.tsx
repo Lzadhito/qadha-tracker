@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
@@ -6,19 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 export type PrayerPattern = "consistent" | "completely_missed"
 export type FastingPattern = "all_fasted" | "few_missed" | "half" | "few_fasted" | "none_fasted" | "custom"
 
-const PRAYER_PATTERN_LABELS: Record<PrayerPattern, string> = {
-  consistent: "Praying consistently (no qadha)",
-  completely_missed: "Missing prayers (assume all missed)",
-}
-
-const FASTING_PATTERN_LABELS: Record<FastingPattern, string> = {
-  all_fasted: "All fasted (0/Ramadan)",
-  few_missed: "Few missed (~5/Ramadan)",
-  half: "About half (15/Ramadan)",
-  few_fasted: "Mostly missed (25/Ramadan)",
-  none_fasted: "None fasted (30/Ramadan)",
-  custom: "Custom",
-}
+const PRAYER_PATTERNS: PrayerPattern[] = ["consistent", "completely_missed"]
+const FASTING_PATTERNS: FastingPattern[] = ["all_fasted", "few_missed", "half", "few_fasted", "none_fasted", "custom"]
 
 const FASTING_PRESET_DAYS: Record<FastingPattern, number> = {
   all_fasted: 0,
@@ -61,6 +51,7 @@ interface PrayerPhaseCardProps {
 }
 
 export function PrayerPhaseCard({ phase, index, total, onChange, onRemove }: PrayerPhaseCardProps) {
+  const { t } = useTranslation()
   const setPattern = (p: PrayerPattern) => {
     onChange(phase.id, { pattern: p, missedPct: PRAYER_PATTERN_PCT[p] })
   }
@@ -68,17 +59,17 @@ export function PrayerPhaseCard({ phase, index, total, onChange, onRemove }: Pra
   return (
     <div className="rounded-lg border border-border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-muted-foreground">Phase {index + 1}</span>
+        <span className="text-sm font-medium text-muted-foreground">{t("phase.phaseN", { n: index + 1 })}</span>
         {total > 1 && (
           <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => onRemove(phase.id)}>
-            Remove
+            {t("common.remove")}
           </Button>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs">Start year</Label>
+          <Label className="text-xs">{t("phase.startYear")}</Label>
           <Input
             type="number"
             min={1940}
@@ -88,7 +79,7 @@ export function PrayerPhaseCard({ phase, index, total, onChange, onRemove }: Pra
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">End year</Label>
+          <Label className="text-xs">{t("phase.endYear")}</Label>
           <Input
             type="number"
             min={phase.startYear}
@@ -100,14 +91,14 @@ export function PrayerPhaseCard({ phase, index, total, onChange, onRemove }: Pra
       </div>
 
       <div className="space-y-1">
-        <Label className="text-xs">Pattern</Label>
+        <Label className="text-xs">{t("phase.pattern")}</Label>
         <Select value={phase.pattern} onValueChange={(v) => setPattern(v as PrayerPattern)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(PRAYER_PATTERN_LABELS).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v}</SelectItem>
+            {PRAYER_PATTERNS.map((k) => (
+              <SelectItem key={k} value={k}>{t(`phase.prayer.${k}`)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -126,6 +117,7 @@ interface FastingPhaseCardProps {
 }
 
 export function FastingPhaseCard({ phase, index, total, onChange, onRemove }: FastingPhaseCardProps) {
+  const { t } = useTranslation()
   const setPattern = (p: FastingPattern) => {
     onChange(phase.id, {
       pattern: p,
@@ -136,17 +128,17 @@ export function FastingPhaseCard({ phase, index, total, onChange, onRemove }: Fa
   return (
     <div className="rounded-lg border border-border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-muted-foreground">Phase {index + 1}</span>
+        <span className="text-sm font-medium text-muted-foreground">{t("phase.phaseN", { n: index + 1 })}</span>
         {total > 1 && (
           <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => onRemove(phase.id)}>
-            Remove
+            {t("common.remove")}
           </Button>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs">Start year</Label>
+          <Label className="text-xs">{t("phase.startYear")}</Label>
           <Input
             type="number"
             min={1940}
@@ -156,7 +148,7 @@ export function FastingPhaseCard({ phase, index, total, onChange, onRemove }: Fa
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">End year</Label>
+          <Label className="text-xs">{t("phase.endYear")}</Label>
           <Input
             type="number"
             min={phase.startYear}
@@ -168,14 +160,14 @@ export function FastingPhaseCard({ phase, index, total, onChange, onRemove }: Fa
       </div>
 
       <div className="space-y-1">
-        <Label className="text-xs">Pattern</Label>
+        <Label className="text-xs">{t("phase.pattern")}</Label>
         <Select value={phase.pattern} onValueChange={(v) => setPattern(v as FastingPattern)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(FASTING_PATTERN_LABELS).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v}</SelectItem>
+            {FASTING_PATTERNS.map((k) => (
+              <SelectItem key={k} value={k}>{t(`phase.fasting.${k}`)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -183,7 +175,7 @@ export function FastingPhaseCard({ phase, index, total, onChange, onRemove }: Fa
 
       {phase.pattern === "custom" && (
         <div className="space-y-1">
-          <Label className="text-xs">Days missed per Ramadan (0–30)</Label>
+          <Label className="text-xs">{t("phase.daysMissed")}</Label>
           <Input
             type="number"
             min={0}

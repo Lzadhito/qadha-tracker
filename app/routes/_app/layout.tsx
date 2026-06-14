@@ -1,13 +1,15 @@
 import { Outlet, Link, useLocation } from "react-router"
+import { useTranslation } from "react-i18next"
 import { BookOpen, History, Settings } from "lucide-react"
 
 export default function AppLayout() {
   const location = useLocation()
+  const { t } = useTranslation()
 
   const navItems = [
-    { href: "/log", label: "Log", icon: BookOpen },
-    { href: "/history", label: "History", icon: History },
-    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/log", label: t("nav.log"), icon: BookOpen },
+    { href: "/history", label: t("nav.history"), icon: History },
+    { href: "/settings", label: t("nav.settings"), icon: Settings },
   ]
 
   return (
@@ -15,7 +17,10 @@ export default function AppLayout() {
       {/* Desktop side nav */}
       <nav className="hidden md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 md:p-4">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-primary">Qadha</h1>
+          <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
+            <img src="/sujud.svg" className="h-7 w-7" alt="" />
+            {t("nav.brand")}
+          </h1>
         </div>
         <ul className="space-y-2">
           {navItems.map(({ href, label, icon: Icon }) => (

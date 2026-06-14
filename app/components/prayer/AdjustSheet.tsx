@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
@@ -7,7 +8,6 @@ import { Separator } from "~/components/ui/separator"
 import { usePrayerAdjust, useFastingAdjust } from "~/lib/queries/use-log-mutation"
 import { PRAYERS } from "~/lib/queries/use-remaining"
 import type { Prayer } from "~/lib/queries/use-remaining"
-import { PRAYER_LABELS } from "~/lib/format"
 
 interface PrayerRow { prayer: Prayer; displayRemaining: number }
 
@@ -19,6 +19,7 @@ interface AdjustSheetProps {
 }
 
 export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }: AdjustSheetProps) {
+  const { t } = useTranslation()
   const [prayerValues, setPrayerValues] = useState<Record<Prayer, string>>({
     subuh: "", zuhur: "", asar: "", maghrib: "", isya: "",
   })
@@ -77,15 +78,15 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom">
         <SheetHeader>
-          <SheetTitle>Adjust remaining qadha</SheetTitle>
+          <SheetTitle>{t("adjust.title")}</SheetTitle>
         </SheetHeader>
         <div className="py-4 space-y-4 px-4">
           <p className="text-xs text-muted-foreground">
-            Change the count directly. The difference is recorded as an adjustment in your history.
+            {t("adjust.desc")}
           </p>
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Add days to all prayers</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("adjust.addToAll")}</p>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
@@ -95,21 +96,21 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
                 placeholder="0"
                 className="w-28"
               />
-              <span className="text-sm text-muted-foreground">days</span>
+              <span className="text-sm text-muted-foreground">{t("adjust.days")}</span>
               <Button size="sm" onClick={handleAddDays} disabled={isPending || !addDays || Number(addDays) <= 0}>
-                Add
+                {t("adjust.add")}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">Adds this count to each of the 5 prayers.</p>
+            <p className="text-xs text-muted-foreground">{t("adjust.addToAllDesc")}</p>
           </div>
 
           <Separator />
 
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Set exact remaining per prayer</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("adjust.setExact")}</p>
             {PRAYERS.map((p) => (
               <div key={p} className="flex items-center gap-3">
-                <Label className="w-36 text-sm shrink-0">{PRAYER_LABELS[p]}</Label>
+                <Label className="w-36 text-sm shrink-0">{t(`prayers.${p}`)}</Label>
                 <Input
                   type="number"
                   min={0}
@@ -124,9 +125,9 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
           <Separator />
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Fasting</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("adjust.fasting")}</p>
             <div className="flex items-center gap-3">
-              <Label className="w-36 text-sm shrink-0">Days remaining</Label>
+              <Label className="w-36 text-sm shrink-0">{t("adjust.daysRemaining")}</Label>
               <Input
                 type="number"
                 min={0}
@@ -138,7 +139,7 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
           </div>
 
           <Button className="w-full" onClick={handleSave} disabled={isPending}>
-            {isPending ? "Saving..." : "Save adjustments"}
+            {isPending ? t("common.saving") : t("adjust.saveAdjustments")}
           </Button>
         </div>
       </SheetContent>

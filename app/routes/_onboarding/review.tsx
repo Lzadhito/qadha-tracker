@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
+import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { Card } from "~/components/ui/card"
 import { supabase } from "~/lib/supabase"
@@ -15,6 +16,7 @@ function getOnboardingData() {
 
 export default function Review() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -121,7 +123,7 @@ export default function Review() {
       sessionStorage.removeItem("onboarding")
       navigate("/log")
     } catch (err: any) {
-      setError(err?.message ?? "Something went wrong. Please try again.")
+      setError(err?.message ?? t("onboarding.review.genericError"))
     } finally {
       setLoading(false)
     }
@@ -132,21 +134,21 @@ export default function Review() {
   return (
     <div className="max-w-md mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Review</h1>
+        <h1 className="text-2xl font-bold">{t("onboarding.review.title")}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Here's your qadha debt.
+          {t("onboarding.review.subtitle")}
         </p>
       </div>
 
       <div className="space-y-3">
         <Card className="p-5">
-          <p className="text-sm text-muted-foreground mb-1">Total prayer qadha</p>
+          <p className="text-sm text-muted-foreground mb-1">{t("onboarding.review.totalPrayer")}</p>
           <p className="text-4xl font-bold">{totalPrayer.toLocaleString()}</p>
           {prayerDirectCounts && (
             <div className="mt-2 space-y-0.5">
               {PRAYERS.map((p) => (
                 <p key={p} className="text-xs text-muted-foreground">
-                  {p.charAt(0).toUpperCase() + p.slice(1)}: {(prayerDirectCounts[p] ?? 0).toLocaleString()}
+                  {t(`prayers.${p}`)}: {(prayerDirectCounts[p] ?? 0).toLocaleString()}
                 </p>
               ))}
             </div>
@@ -154,9 +156,9 @@ export default function Review() {
         </Card>
 
         <Card className="p-5">
-          <p className="text-sm text-muted-foreground mb-1">Total fasting qadha</p>
+          <p className="text-sm text-muted-foreground mb-1">{t("onboarding.review.totalFasting")}</p>
           <p className="text-4xl font-bold">{totalFasting.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground mt-1">days</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("onboarding.review.days")}</p>
         </Card>
       </div>
 
@@ -165,15 +167,15 @@ export default function Review() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        You can adjust these later in Settings.
+        {t("onboarding.review.adjustLater")}
       </p>
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate(prevStep)} className="flex-1" disabled={loading}>
-          Adjust
+          {t("onboarding.review.adjust")}
         </Button>
         <Button onClick={handleConfirm} className="flex-1" disabled={loading}>
-          {loading ? "Saving..." : "Looks right — start"}
+          {loading ? t("onboarding.review.submitting") : t("onboarding.review.confirm")}
         </Button>
       </div>
     </div>

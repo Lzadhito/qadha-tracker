@@ -1,7 +1,8 @@
 import { useNavigate, useParams } from "react-router"
+import { useTranslation } from "react-i18next"
 import { requireOnboarded } from "~/lib/guards"
 import { useHistoryEntry, useDeleteEntry } from "~/lib/queries/use-history"
-import { formatLedgerDate, getPrayerLabel } from "~/lib/format"
+import { formatLedgerDate } from "~/lib/format"
 import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
 import {
@@ -20,17 +21,13 @@ export async function clientLoader() {
   return requireOnboarded()
 }
 
-const ENTRY_LABELS: Record<string, string> = {
-  qadha: "Qadha",
-  miss: "Miss",
-  baseline: "Baseline",
-  adjustment: "Adjustment",
-}
-
 export default function HistoryEntry() {
+  const { t } = useTranslation()
   const { entryId } = useParams()
   const navigate = useNavigate()
   const deleteEntry = useDeleteEntry()
+  const entryLabel = (type: string) => t(`history.${type}`, { defaultValue: type })
+  const prayerLabel = (p: string) => t(`prayers.${p}`, { defaultValue: p })
 
   const [obligation, id] = (entryId ?? "").split(/-(.+)/)
   const entry = useHistoryEntry(id ?? "", obligation as "prayer" | "fasting")
@@ -44,10 +41,10 @@ export default function HistoryEntry() {
   return (
     <div className="max-w-lg mx-auto px-4 py-6">
       <Button variant="ghost" size="sm" onClick={() => navigate("/history")} className="mb-4">
-        ← Back
+        ← {t("common.back")}
       </Button>
 
-      <h1 className="text-xl font-bold mb-6">Entry Detail</h1>
+      <h1 className="text-xl font-bold mb-6">{t("history.entryDetail")}</h1>
 
       {entry.isLoading ? (
         <div className="space-y-3 mb-6">
@@ -58,26 +55,26 @@ export default function HistoryEntry() {
       ) : entry.data ? (
         <div className="rounded-xl border border-border bg-card px-4 py-4 mb-6 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Type</span>
+            <span className="text-sm text-muted-foreground">{t("history.type")}</span>
             <span className="text-sm font-medium">
               {entry.data.obligation === "prayer"
-                ? `${getPrayerLabel((entry.data as any).prayer)} — ${ENTRY_LABELS[entry.data.entry_type] ?? entry.data.entry_type}`
-                : `Fasting — ${ENTRY_LABELS[entry.data.entry_type] ?? entry.data.entry_type}`}
+                ? `${prayerLabel((entry.data as any).prayer)} — ${entryLabel(entry.data.entry_type)}`
+                : `${t("history.fastingType")} — ${entryLabel(entry.data.entry_type)}`}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Amount</span>
+            <span className="text-sm text-muted-foreground">{t("history.amount")}</span>
             <span className={`text-sm font-mono font-medium ${entry.data.amount < 0 ? "text-primary" : "text-foreground/70"}`}>
               {entry.data.amount > 0 ? "+" : ""}{entry.data.amount}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Logged at</span>
+            <span className="text-sm text-muted-foreground">{t("history.loggedAt")}</span>
             <span className="text-sm">{formatLedgerDate(entry.data.logged_at)}</span>
           </div>
           {(entry.data as any).fasted_on && (
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Fasted on</span>
+              <span className="text-sm text-muted-foreground">{t("history.fastedOn")}</span>
               <span className="text-sm">{(entry.data as any).fasted_on}</span>
             </div>
           )}
@@ -87,20 +84,20 @@ export default function HistoryEntry() {
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="destructive" className="w-full" disabled={entry.isLoading}>
-            Delete entry
+            {t("history.deleteEntry")}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
+            <AlertDialogTitle>{t("history.deleteConfirm")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Remaining count adjusts accordingly. Cannot be undone.
+              {t("history.deleteDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={deleteEntry.isPending}>
-              Delete
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

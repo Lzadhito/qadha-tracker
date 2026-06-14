@@ -30,7 +30,10 @@ export default function SignIn() {
   return (
     <Card className="p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t("auth.title")}</h1>
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <img src="/sujud.svg" className="h-7 w-7" alt="" />
+          {t("auth.title")}
+        </h1>
         <p className="text-muted-foreground text-sm mt-1">
           {t("auth.subtitle")}
         </p>

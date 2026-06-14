@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router"
+import { useTranslation } from "react-i18next"
 import { useTheme } from "next-themes"
 import { requireOnboarded } from "~/lib/guards"
 import { signOut } from "~/lib/auth"
@@ -21,8 +22,8 @@ export async function clientLoader() {
 }
 
 const LINKS = [
-  { href: "/settings/data", label: "Data & Privacy" },
-  { href: "/settings/about", label: "About" },
+  { href: "/settings/data", labelKey: "settings.dataPrivacy" },
+  { href: "/settings/about", labelKey: "settings.about" },
 ]
 
 const LOCALES = [
@@ -40,6 +41,7 @@ const TIMEZONES = [
 
 export default function Settings() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { resolvedTheme, setTheme } = useTheme()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -83,9 +85,9 @@ export default function Settings() {
         .eq("user_id", session.user.id)
       if (error) throw error
       i18n.changeLanguage(locale)
-      toast.success("Profile saved.")
+      toast.success(t("settings.saved"))
     } catch {
-      toast.error("Failed to save profile.")
+      toast.error(t("settings.saveFailed"))
     } finally {
       setSaving(false)
     }
@@ -98,11 +100,14 @@ export default function Settings() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-      <h1 className="text-xl font-bold">Settings</h1>
+      <h1 className="text-xl font-bold flex items-center gap-2">
+        <img src="/sujud.svg" className="h-6 w-6" alt="" />
+        {t("settings.title")}
+      </h1>
 
       {/* Profile */}
       <div className="space-y-4">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Profile</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t("settings.profile")}</h2>
         {loading ? (
           <div className="space-y-3">
             <Skeleton className="h-10 w-full" />
@@ -111,15 +116,15 @@ export default function Settings() {
         ) : (
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label>Display name (optional)</Label>
+              <Label>{t("settings.displayName")}</Label>
               <Input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your name"
+                placeholder={t("settings.displayNamePlaceholder")}
               />
             </div>
             <div className="space-y-1">
-              <Label>Language</Label>
+              <Label>{t("settings.language")}</Label>
               <Select value={locale} onValueChange={setLocale}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -130,7 +135,7 @@ export default function Settings() {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Timezone</Label>
+              <Label>{t("settings.timezone")}</Label>
               <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -141,7 +146,7 @@ export default function Settings() {
               </Select>
             </div>
             <Button onClick={handleSave} disabled={saving} className="w-full">
-              {saving ? "Saving..." : "Save profile"}
+              {saving ? t("common.saving") : t("settings.saveProfile")}
             </Button>
           </div>
         )}
@@ -151,9 +156,9 @@ export default function Settings() {
 
       {/* Appearance */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Appearance</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t("settings.appearance")}</h2>
         <div className="flex items-center justify-between">
-          <Label htmlFor="dark-mode">Dark mode</Label>
+          <Label htmlFor="dark-mode">{t("settings.darkMode")}</Label>
           <Switch
             id="dark-mode"
             checked={resolvedTheme === "dark"}
@@ -166,13 +171,13 @@ export default function Settings() {
 
       {/* Nav links */}
       <div className="rounded-xl border border-border bg-card divide-y divide-border">
-        {LINKS.map(({ href, label }) => (
+        {LINKS.map(({ href, labelKey }) => (
           <Link
             key={href}
             to={href}
             className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
           >
-            <span className="text-sm">{label}</span>
+            <span className="text-sm">{t(labelKey)}</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </Link>
         ))}
@@ -185,7 +190,7 @@ export default function Settings() {
         className="w-full text-destructive border-destructive/50 hover:bg-destructive/10"
         onClick={handleSignOut}
       >
-        Sign out
+        {t("settings.signOut")}
       </Button>
     </div>
   )

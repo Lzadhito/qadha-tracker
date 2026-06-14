@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { format, isSameDay, eachDayOfInterval } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { Button } from "~/components/ui/button"
@@ -19,6 +20,7 @@ function formatDate(d: Date) {
 }
 
 export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheetProps) {
+  const { t } = useTranslation()
   const [range, setRange] = useState<DateRange | undefined>()
   const log = useLogRemainingToday()
 
@@ -64,14 +66,12 @@ export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheet
   }
 
   const rangeLabel = () => {
-    if (!range?.from) return "Select date(s) above"
-    const count = isSingleDate
-      ? remainingCount
-      : eachDayOfInterval({ start: range.from, end: range.to ?? range.from }).length * PRAYERS.length
+    if (!range?.from) return t("remaining.selectDates")
     if (isSingleDate) {
-      return `Log ${remainingCount} prayer${remainingCount !== 1 ? "s" : ""} for ${format(range.from, "d MMM yyyy")}`
+      return t("remaining.logForDate", { count: remainingCount, date: format(range.from, "d MMM yyyy") })
     }
-    return `Log all prayers for ${format(range.from, "d MMM")} – ${format(range.to!, "d MMM yyyy")} (${count} entries)`
+    const dayCount = eachDayOfInterval({ start: range.from, end: range.to ?? range.from }).length
+    return t("remaining.logAllRange", { from: format(range.from, "d MMM"), to: format(range.to!, "d MMM yyyy"), count: dayCount })
   }
 
   return (
@@ -79,18 +79,18 @@ export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheet
       <SheetContent side="bottom">
         <SheetHeader>
           <SheetTitle>
-            +Qadha remaining {remainingCount} prayer{remainingCount !== 1 ? "s" : ""}
+            {t("remaining.title", { count: remainingCount })}
           </SheetTitle>
         </SheetHeader>
         <div className="py-4 space-y-3 px-4">
           {!range?.from && (
             <Button className="w-full" onClick={() => logDays()} disabled={log.isPending}>
-              Right now ({getRemainingPrayers(todayDone).length} remaining today)
+              {t("remaining.rightNowToday", { count: getRemainingPrayers(todayDone).length })}
             </Button>
           )}
           <div className="flex items-center gap-3">
             <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground">or pick a date</span>
+            <span className="text-xs text-muted-foreground">{t("remaining.orPickDate")}</span>
             <div className="flex-1 border-t border-border" />
           </div>
           <Calendar
@@ -103,10 +103,10 @@ export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheet
           {range?.from && (
             <>
               {isLoading && (
-                <p className="text-xs text-muted-foreground text-center">Checking logged prayers…</p>
+                <p className="text-xs text-muted-foreground text-center">{t("remaining.checking")}</p>
               )}
               {!isLoading && isSingleDate && remainingCount === 0 && (
-                <p className="text-xs text-muted-foreground text-center">All prayers already logged for this day.</p>
+                <p className="text-xs text-muted-foreground text-center">{t("remaining.allLogged")}</p>
               )}
               {!isLoading && (remainingCount > 0 || !isSingleDate) && (
                 <Button
