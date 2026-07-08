@@ -8,7 +8,8 @@
       "Bash(npx tsc *)",
       "Bash(npm test *)",
       "Bash(gh repo *)",
-      "PowerShell(gh *)"
+      "PowerShell(gh *)",
+      "Bash(xargs -I{} echo {})"
     ]
   }
 }

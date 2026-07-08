@@ -10,6 +10,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query"
 import { ThemeProvider } from "next-themes"
 import { useTranslation } from "react-i18next"
 import { Toaster } from "~/components/ui/sonner"
+import { Skeleton } from "~/components/ui/skeleton"
 import "~/lib/i18n"
 
 import type { Route } from "./+types/root"
@@ -50,6 +51,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return <Outlet />
+}
+
+export function HydrateFallback() {
+  return (
+    <div className="min-h-screen p-4 md:p-8 space-y-4">
+      <Skeleton className="h-8 w-40" />
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-32 w-full" />
+    </div>
+  )
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
