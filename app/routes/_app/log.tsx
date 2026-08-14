@@ -30,9 +30,9 @@ export default function Log() {
 
   const prayerRemaining = prayers.data?.reduce((s, r) => s + r.remaining, 0) ?? 0
   const fastingRemaining = fasting.data?.displayRemaining ?? 0
-  const loaded = !prayers.isLoading && !fasting.isLoading
+  const loaded = !prayers.isLoading
   const prayerSummary = loaded ? formatDaysLeft(Math.ceil(prayerRemaining / 5), t) : null
-  const fastingSummary = loaded && fastingRemaining > 0 ? t("duration.day", { count: fastingRemaining }) : null
+  const fastingSummary = !fasting.isLoading && fastingRemaining > 0 ? t("duration.day", { count: fastingRemaining }) : null
 
   const today = formatTodayDate()
 
@@ -51,7 +51,7 @@ export default function Log() {
         </div>
       )}
 
-      {!prayers.isLoading && !fasting.isLoading && (
+      {!prayers.isLoading && (
         <div className="flex flex-col gap-2 pb-2">
           {todayDone.size > 0 && remainingCount > 0 && (
             <Button

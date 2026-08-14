@@ -4,6 +4,32 @@ import { supabase } from "~/lib/supabase"
 export const PRAYERS = ["subuh", "zuhur", "asar", "maghrib", "isya"] as const
 export type Prayer = (typeof PRAYERS)[number]
 
+// ponytail: last-known numbers for the two remaining queries, restored instantly via
+// placeholderData while the background refetch updates them. Per-user clearing lives in signOut().
+const cacheKey = (key: string) => `qadha:cache:${key}`
+
+function cachedData<T>(key: string): T | undefined {
+  try {
+    const raw = localStorage.getItem(cacheKey(key))
+    return raw ? (JSON.parse(raw) as T) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+function writeCache(key: string, value: unknown) {
+  try {
+    localStorage.setItem(cacheKey(key), JSON.stringify(value))
+  } catch {
+    // quota or private mode: cache is best-effort
+  }
+}
+
+export function clearCachedRemaining() {
+  localStorage.removeItem(cacheKey("prayer-remaining"))
+  localStorage.removeItem(cacheKey("fasting-remaining"))
+}
+
 export function getRemainingPrayers(done: Set<Prayer>): Prayer[] {
   return PRAYERS.filter((p) => !done.has(p))
 }
@@ -17,6 +43,7 @@ export interface PrayerRemaining {
 export function usePrayerRemaining() {
   return useQuery({
     queryKey: ["prayer-remaining"],
+    placeholderData: () => cachedData<PrayerRemaining[]>("prayer-remaining"),
     queryFn: async (): Promise<PrayerRemaining[]> => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error("Not authenticated")
@@ -33,10 +60,12 @@ export function usePrayerRemaining() {
         sums[row.prayer] = (sums[row.prayer] ?? 0) + amt
       }
 
-      return PRAYERS.map((prayer) => {
+      const result = PRAYERS.map((prayer) => {
         const remaining = sums[prayer] ?? 0
         return { prayer, remaining, displayRemaining: Math.max(0, remaining) }
       })
+      writeCache("prayer-remaining", result)
+      return result
     },
   })
 }
@@ -119,6 +148,7 @@ export function resolveExclude({
 export function useFastingRemaining() {
   return useQuery({
     queryKey: ["fasting-remaining"],
+    placeholderData: () => cachedData<{ remaining: number; displayRemaining: number }>("fasting-remaining"),
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error("Not authenticated")
@@ -133,7 +163,9 @@ export function useFastingRemaining() {
         (s, r: { amount: number }) => s + Number(r.amount ?? 0),
         0
       )
-      return { remaining: total, displayRemaining: Math.max(0, total) }
+      const result = { remaining: total, displayRemaining: Math.max(0, total) }
+      writeCache("fasting-remaining", result)
+      return result
     },
   })
 }

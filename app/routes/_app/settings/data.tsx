@@ -3,6 +3,7 @@ import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { requireOnboarded } from "~/lib/guards"
 import { supabase } from "~/lib/supabase"
+import { signOut } from "~/lib/auth"
 import { getLocalProfile } from "~/lib/local-profile"
 import { Button } from "~/components/ui/button"
 import {
@@ -71,7 +72,7 @@ export default function Data() {
       // Call RPC to cascade-delete user data + auth.users row
       const { error } = await supabase.rpc("delete_account")
       if (error) throw error
-      await supabase.auth.signOut()
+      await signOut()
       navigate("/auth/sign-in")
     } catch (err) {
       console.error(err)

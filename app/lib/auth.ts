@@ -1,4 +1,5 @@
 import { supabase } from "./supabase"
+import { clearCachedRemaining } from "./queries/use-remaining"
 
 export async function getSession() {
   const {
@@ -28,6 +29,7 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
+  clearCachedRemaining()
   const { error } = await supabase.auth.signOut()
   return { error }
 }
