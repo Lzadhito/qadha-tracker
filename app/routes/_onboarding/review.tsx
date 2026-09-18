@@ -3,7 +3,7 @@ import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { Button } from "~/components/ui/button"
 import { Card } from "~/components/ui/card"
-import { supabase } from "~/lib/supabase"
+import { getSupabase } from "~/lib/supabase"
 import { saveLocalProfile } from "~/lib/local-profile"
 import { prayerBaselineForPhase, fastingBaselineForPhase } from "~/lib/calculations"
 import type { PrayerPhaseData, FastingPhaseData } from "~/components/onboarding/PhaseEditor"
@@ -45,6 +45,7 @@ export default function Review() {
     setLoading(true)
     setError(null)
     try {
+      const supabase = await getSupabase()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { navigate("/auth/sign-in"); return }
 

@@ -1,7 +1,8 @@
-import { supabase } from "./supabase"
+import { getSupabase } from "./supabase"
 import { clearCachedRemaining } from "./queries/use-remaining"
 
 export async function getSession() {
+  const supabase = await getSupabase()
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -9,6 +10,7 @@ export async function getSession() {
 }
 
 export async function signInWithMagicLink(email: string) {
+  const supabase = await getSupabase()
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
@@ -19,6 +21,7 @@ export async function signInWithMagicLink(email: string) {
 }
 
 export async function signInWithGoogle() {
+  const supabase = await getSupabase()
   const { error, data } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -30,11 +33,13 @@ export async function signInWithGoogle() {
 
 export async function signOut() {
   clearCachedRemaining()
+  const supabase = await getSupabase()
   const { error } = await supabase.auth.signOut()
   return { error }
 }
 
 export async function exchangeCodeForSession(code: string) {
+  const supabase = await getSupabase()
   const { error, data } = await supabase.auth.exchangeCodeForSession(code)
   return { error, data }
 }

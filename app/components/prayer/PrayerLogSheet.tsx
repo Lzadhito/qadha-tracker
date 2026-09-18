@@ -3,24 +3,33 @@ import { useTranslation } from "react-i18next"
 import { format, eachDayOfInterval } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { Button } from "~/components/ui/button"
-import { Calendar } from "~/components/ui/calendar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
-import { logFullDay } from "~/lib/log-actions"
+import { Calendar } from "~/components/ui/calendar"
+import { logPrayer } from "~/lib/log-actions"
+import type { Prayer } from "~/lib/queries/use-remaining"
 
-interface FullDaySheetProps {
+interface PrayerLogSheetProps {
+  prayer: Prayer
   open: boolean
-  onOpenChange: (v: boolean) => void
+  onOpenChange: (open: boolean) => void
 }
 
-export function FullDaySheet({ open, onOpenChange }: FullDaySheetProps) {
+// Lazy-loaded (calendar + dialog) and shared by all prayer cards.
+export function PrayerLogSheet({ prayer, open, onOpenChange }: PrayerLogSheetProps) {
   const { t } = useTranslation()
   const [range, setRange] = useState<DateRange | undefined>()
+  const prayerName = t(`prayers.${prayer}`)
 
   const days = range?.from
     ? eachDayOfInterval({ start: range.from, end: range.to ?? range.from })
     : []
 
-  const logDays = (dates?: DateRange) => {
+  const close = () => {
+    onOpenChange(false)
+    setRange(undefined)
+  }
+
+  const logQadha = (dates?: DateRange) => {
     let loggedDates: string[] | undefined
     if (dates?.from) {
       const dayList = eachDayOfInterval({ start: dates.from, end: dates.to ?? dates.from })
@@ -30,35 +39,34 @@ export function FullDaySheet({ open, onOpenChange }: FullDaySheetProps) {
         return local.toISOString()
       })
     }
-    logFullDay(loggedDates)
-    onOpenChange(false)
-    setRange(undefined)
+    logPrayer(prayer, loggedDates)
+    close()
   }
 
   const rangeLabel = () => {
-    if (!range?.from) return t("fullDay.selectDates")
+    if (!range?.from) return t("prayerCard.selectDates")
     if (!range.to || format(range.from, "yyyy-MM-dd") === format(range.to, "yyyy-MM-dd")) {
-      return t("fullDay.logFor", { date: format(range.from, "d MMM yyyy") })
+      return t("prayerCard.logFor", { date: format(range.from, "d MMM yyyy") })
     }
-    return t("fullDay.logRange", { from: format(range.from, "d MMM"), to: format(range.to, "d MMM yyyy"), count: days.length })
+    return t("prayerCard.logRange", { from: format(range.from, "d MMM"), to: format(range.to, "d MMM yyyy"), count: days.length })
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={(v) => (v ? onOpenChange(true) : close())}>
       <SheetContent side="bottom">
         <SheetHeader>
-          <SheetTitle>{t("fullDay.title")}</SheetTitle>
+          <SheetTitle>{t("prayerCard.whenDidYou", { prayer: prayerName })}</SheetTitle>
         </SheetHeader>
         <div className="py-4 space-y-3 px-4">
           <p className="text-xs text-muted-foreground">
-            {t("fullDay.desc")}
+            {t("prayerCard.selectOrDrag")}
           </p>
-          <Button className="w-full" onClick={() => logDays()}>
-            {t("fullDay.todayNow")}
+          <Button className="w-full" onClick={() => logQadha()}>
+            {t("common.rightNow")}
           </Button>
           <div className="flex items-center gap-3">
             <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground">{t("fullDay.orChooseDates")}</span>
+            <span className="text-xs text-muted-foreground">{t("prayerCard.orChooseDates")}</span>
             <div className="flex-1 border-t border-border" />
           </div>
           <Calendar
@@ -72,7 +80,7 @@ export function FullDaySheet({ open, onOpenChange }: FullDaySheetProps) {
             variant="outline"
             className="w-full"
             disabled={!range?.from}
-            onClick={() => range?.from && logDays(range)}
+            onClick={() => range?.from && logQadha(range)}
           >
             {rangeLabel()}
           </Button>

@@ -1,10 +1,15 @@
-import { format } from "date-fns"
-import { id as idLocale, enUS } from "date-fns/locale"
 import type { TFunction } from "i18next"
 import i18n from "~/lib/i18n"
 
-function dateLocale() {
-  return i18n.language === "id" ? idLocale : enUS
+// Built-in Intl instead of date-fns keeps date-fns (and its locales) out of the log screen's
+// initial bundle. Parts are reassembled to keep the exact date-fns patterns noted below.
+function dateParts(date: Date, options: Intl.DateTimeFormatOptions) {
+  const locale = i18n.language === "id" ? "id-ID" : "en-US"
+  const parts: Partial<Record<Intl.DateTimeFormatPartTypes, string>> = {}
+  for (const { type, value } of new Intl.DateTimeFormat(locale, options).formatToParts(date)) {
+    parts[type] = value
+  }
+  return parts
 }
 
 // Break a raw day count into years / months / days using i18n duration keys.
@@ -21,10 +26,16 @@ export function formatDaysLeft(days: number, t: TFunction): string | null {
   return parts.join(" ")
 }
 
+// date-fns "d MMMM yyyy, HH:mm"
 export function formatLedgerDate(isoString: string): string {
-  return format(new Date(isoString), "d MMMM yyyy, HH:mm", { locale: dateLocale() })
+  const p = dateParts(new Date(isoString), {
+    day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  })
+  return `${p.day} ${p.month} ${p.year}, ${p.hour}:${p.minute}`
 }
 
-export function formatTodayDate(): string {
-  return format(new Date(), "EEEE, d MMMM", { locale: dateLocale() })
+// date-fns "EEEE, d MMMM"
+export function formatTodayDate(date: Date = new Date()): string {
+  const p = dateParts(date, { weekday: "long", day: "numeric", month: "long" })
+  return `${p.weekday}, ${p.day} ${p.month}`
 }

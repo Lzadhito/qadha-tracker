@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { supabase } from "~/lib/supabase"
+import { getSupabase } from "~/lib/supabase"
 
 export type ObligationType = "all" | "prayer" | "fasting"
 export type EntryType = "all" | "qadha" | "miss" | "adjustment"
@@ -16,6 +16,7 @@ export function useHistory(
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
+      const supabase = await getSupabase()
 
       const prayers =
         obligation === "fasting"
@@ -65,6 +66,7 @@ export function useHistoryEntry(id: string, obligation: "prayer" | "fasting") {
     queryKey: ["history-entry", obligation, id],
     enabled: !!id,
     queryFn: async () => {
+      const supabase = await getSupabase()
       if (obligation === "prayer") {
         const { data, error } = await supabase
           .from("prayer_ledger")
@@ -99,6 +101,7 @@ export function useDeleteEntry() {
     }) => {
       const table =
         obligation === "prayer" ? "prayer_ledger" : "fasting_ledger"
+      const supabase = await getSupabase()
       const { error } = await supabase.from(table).delete().eq("id", id)
       if (error) throw error
     },

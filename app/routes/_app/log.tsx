@@ -1,16 +1,38 @@
-import { useState } from "react"
+import { lazy, Suspense, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { CloudUpload } from "lucide-react"
 import { requireOnboarded } from "~/lib/guards"
-import { PRAYERS, usePrayerRemaining, useFastingRemaining, useTodayPrayerLog } from "~/lib/queries/use-remaining"
+import {
+  PRAYERS,
+  usePendingCount,
+  usePrayerRemaining,
+  useFastingRemaining,
+  useTodayPrayerLog,
+  type Prayer,
+} from "~/lib/queries/use-remaining"
 import { formatTodayDate, formatDaysLeft } from "~/lib/format"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
 import { FastingCard } from "~/components/fasting/FastingCard"
-import { FullDaySheet } from "~/components/prayer/FullDaySheet"
-import { RemainingSheet } from "~/components/prayer/RemainingSheet"
-import { AdjustSheet } from "~/components/prayer/AdjustSheet"
 import { Button } from "~/components/ui/button"
-import { Skeleton } from "~/components/ui/skeleton"
 import { Separator } from "~/components/ui/separator"
+
+// Sheets pull in the dialog, calendar and date-fns. They render (closed) on mount, which starts
+// their download right after first paint instead of blocking it.
+const PrayerLogSheet = lazy(() =>
+  import("~/components/prayer/PrayerLogSheet").then((m) => ({ default: m.PrayerLogSheet }))
+)
+const FastingLogSheet = lazy(() =>
+  import("~/components/fasting/FastingLogSheet").then((m) => ({ default: m.FastingLogSheet }))
+)
+const FullDaySheet = lazy(() =>
+  import("~/components/prayer/FullDaySheet").then((m) => ({ default: m.FullDaySheet }))
+)
+const RemainingSheet = lazy(() =>
+  import("~/components/prayer/RemainingSheet").then((m) => ({ default: m.RemainingSheet }))
+)
+const AdjustSheet = lazy(() =>
+  import("~/components/prayer/AdjustSheet").then((m) => ({ default: m.AdjustSheet }))
+)
 
 export async function clientLoader() {
   return requireOnboarded()
@@ -21,20 +43,28 @@ export default function Log() {
   const prayers = usePrayerRemaining()
   const fasting = useFastingRemaining()
   const todayLog = useTodayPrayerLog()
+  const pendingCount = usePendingCount()
+  const [logPrayer, setLogPrayer] = useState<Prayer>("subuh")
+  const [prayerSheetOpen, setPrayerSheetOpen] = useState(false)
+  const [fastingSheetOpen, setFastingSheetOpen] = useState(false)
   const [fullDayOpen, setFullDayOpen] = useState(false)
   const [remainingOpen, setRemainingOpen] = useState(false)
   const [adjustOpen, setAdjustOpen] = useState(false)
 
-  const todayDone = todayLog.data ?? new Set()
+  const todayDone = todayLog.data
   const remainingCount = PRAYERS.length - todayDone.size
 
   const prayerRemaining = prayers.data?.reduce((s, r) => s + r.remaining, 0) ?? 0
   const fastingRemaining = fasting.data?.displayRemaining ?? 0
-  const loaded = !prayers.isLoading
-  const prayerSummary = loaded ? formatDaysLeft(Math.ceil(prayerRemaining / 5), t) : null
-  const fastingSummary = !fasting.isLoading && fastingRemaining > 0 ? t("duration.day", { count: fastingRemaining }) : null
+  const prayerSummary = prayers.data ? formatDaysLeft(Math.ceil(prayerRemaining / 5), t) : null
+  const fastingSummary = fasting.data && fastingRemaining > 0 ? t("duration.day", { count: fastingRemaining }) : null
 
   const today = formatTodayDate()
+
+  const openPrayerSheet = (prayer: Prayer) => {
+    setLogPrayer(prayer)
+    setPrayerSheetOpen(true)
+  }
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-2">
@@ -44,88 +74,85 @@ export default function Log() {
         {t("log.title")}
       </h1>
 
-      {(prayerSummary || fastingSummary) && (
+      {(prayerSummary || fastingSummary || pendingCount > 0) && (
         <div className="text-xs text-muted-foreground pb-1 space-y-0.5">
           {prayerSummary && <p>{t("log.prayerLeft", { duration: prayerSummary })}</p>}
           {fastingSummary && <p>{t("log.fastingLeft", { duration: fastingSummary })}</p>}
+          {pendingCount > 0 && (
+            <p className="flex items-center gap-1">
+              <CloudUpload className="h-3 w-3" />
+              {t("log.pendingSync", { count: pendingCount })}
+            </p>
+          )}
         </div>
       )}
 
-      {!prayers.isLoading && (
-        <div className="flex flex-col gap-2 pb-2">
-          {todayDone.size > 0 && remainingCount > 0 && (
-            <Button
-              size="sm"
-              className="w-full text-xs"
-              onClick={() => setRemainingOpen(true)}
-            >
-              {t("log.qadhaRemaining", { count: remainingCount })}
-            </Button>
-          )}
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 text-xs"
-              onClick={() => setFullDayOpen(true)}
-            >
-              {t("log.qadhaFullDay")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 text-xs"
-              onClick={() => setAdjustOpen(true)}
-            >
-              {t("log.adjustRemaining")}
-            </Button>
-          </div>
+      {/* Recording never waits on data: only the counts below fill in once loaded. */}
+      <div className="flex flex-col gap-2 pb-2">
+        {todayDone.size > 0 && remainingCount > 0 && (
+          <Button
+            size="sm"
+            className="w-full text-xs"
+            onClick={() => setRemainingOpen(true)}
+          >
+            {t("log.qadhaRemaining", { count: remainingCount })}
+          </Button>
+        )}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => setFullDayOpen(true)}
+          >
+            {t("log.qadhaFullDay")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-xs"
+            disabled={!prayers.data || !fasting.data}
+            onClick={() => setAdjustOpen(true)}
+          >
+            {t("log.adjustRemaining")}
+          </Button>
         </div>
-      )}
+      </div>
 
       <div className="rounded-xl border border-border bg-card px-4">
-        {prayers.isLoading
-          ? PRAYERS.map((p) => (
-              <div key={p} className="py-3 border-b border-border/40 last:border-0">
-                <Skeleton className="h-4 w-24 mb-1" />
-                <Skeleton className="h-3 w-32" />
-              </div>
-            ))
-          : prayers.data?.map((r) => (
-              <PrayerCard
-                key={r.prayer}
-                prayer={r.prayer}
-                remaining={r.displayRemaining}
-                loggedToday={todayLog.data?.has(r.prayer) ?? false}
-              />
-            ))}
+        {PRAYERS.map((p) => (
+          <PrayerCard
+            key={p}
+            prayer={p}
+            remaining={prayers.data?.find((r) => r.prayer === p)?.displayRemaining}
+            loggedToday={todayDone.has(p)}
+            onQadha={openPrayerSheet}
+          />
+        ))}
       </div>
 
       <Separator className="my-4" />
 
       <div className="rounded-xl border border-border bg-card px-4">
-        {fasting.isLoading ? (
-          <div className="py-3">
-            <Skeleton className="h-4 w-24 mb-1" />
-            <Skeleton className="h-3 w-36" />
-          </div>
-        ) : (
-          <FastingCard remaining={fastingRemaining} />
-        )}
+        <FastingCard remaining={fasting.data?.displayRemaining} onLog={() => setFastingSheetOpen(true)} />
       </div>
 
-      <FullDaySheet open={fullDayOpen} onOpenChange={setFullDayOpen} />
-      <RemainingSheet
-        open={remainingOpen}
-        onOpenChange={setRemainingOpen}
-        todayDone={todayDone}
-      />
-      <AdjustSheet
-        open={adjustOpen}
-        onOpenChange={setAdjustOpen}
-        prayerRows={prayers.data ?? []}
-        fastingRemaining={fastingRemaining}
-      />
+      <Suspense fallback={null}>
+        <PrayerLogSheet prayer={logPrayer} open={prayerSheetOpen} onOpenChange={setPrayerSheetOpen} />
+        <FastingLogSheet open={fastingSheetOpen} onOpenChange={setFastingSheetOpen} />
+        <FullDaySheet open={fullDayOpen} onOpenChange={setFullDayOpen} />
+        <RemainingSheet
+          open={remainingOpen}
+          onOpenChange={setRemainingOpen}
+          todayDone={todayDone}
+        />
+        <AdjustSheet
+          open={adjustOpen}
+          onOpenChange={setAdjustOpen}
+          prayerRows={prayers.data ?? []}
+          fastingRemaining={fastingRemaining}
+        />
+      </Suspense>
     </div>
   )
 }

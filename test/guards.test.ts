@@ -1,14 +1,17 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import { requireOnboarded } from "../app/lib/guards"
 
-vi.mock("../app/lib/supabase", () => ({
-  supabase: {
-    auth: { getSession: vi.fn() },
-    from: vi.fn(),
-  },
+const supabase = vi.hoisted(() => ({
+  auth: { getSession: vi.fn() },
+  from: vi.fn(),
 }))
 
-import { supabase } from "../app/lib/supabase"
+vi.mock("../app/lib/supabase", () => ({
+  getSupabase: async () => supabase,
+  readStoredSession: vi.fn(),
+}))
+
+import { readStoredSession } from "../app/lib/supabase"
 
 const UID = "user-1"
 const FLAG = `qadha:onboarded:${UID}`
@@ -18,6 +21,16 @@ beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
   vi.mocked(supabase.auth.getSession).mockResolvedValue({ data: { session } } as never)
+  vi.mocked(readStoredSession).mockReturnValue(null)
+})
+
+it("uses the stored session without waiting on getSession's token refresh", async () => {
+  vi.mocked(readStoredSession).mockReturnValue(session as never)
+  localStorage.setItem(FLAG, "2026-08-01T00:00:00Z")
+  const result = await requireOnboarded()
+  expect(result.session.user.id).toBe(UID)
+  expect(supabase.auth.getSession).not.toHaveBeenCalled()
+  expect(supabase.from).not.toHaveBeenCalled()
 })
 
 it("skips the profiles fetch when the onboarded flag is cached", async () => {

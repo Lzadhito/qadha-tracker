@@ -1,7 +1,11 @@
 import { redirect } from "react-router"
-import { supabase } from "./supabase"
+import { getSupabase, readStoredSession } from "./supabase"
 
 export async function requireAuth() {
+  const stored = readStoredSession()
+  if (stored) return stored
+
+  const supabase = await getSupabase()
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -22,6 +26,7 @@ export async function requireOnboarded() {
     return { session, profile: null }
   }
 
+  const supabase = await getSupabase()
   const { data: profile } = await supabase
     .from("profiles")
     .select("onboarded_at")
@@ -38,6 +43,7 @@ export async function requireOnboarded() {
 export async function requireUnonboarded() {
   const session = await requireAuth()
 
+  const supabase = await getSupabase()
   const { data: profile } = await supabase
     .from("profiles")
     .select("onboarded_at")

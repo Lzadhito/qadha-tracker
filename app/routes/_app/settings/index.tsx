@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { useTheme } from "next-themes"
 import { requireOnboarded } from "~/lib/guards"
 import { signOut } from "~/lib/auth"
-import { supabase } from "~/lib/supabase"
+import { getSupabase } from "~/lib/supabase"
 import { getLocalProfile, saveLocalProfile } from "~/lib/local-profile"
 import i18n from "~/lib/i18n"
 import { Button } from "~/components/ui/button"
@@ -54,6 +54,7 @@ export default function Settings() {
       const local = getLocalProfile()
       setDisplayName(local.name ?? "")
 
+      const supabase = await getSupabase()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { setLoading(false); return }
       const { data } = await supabase
@@ -77,6 +78,7 @@ export default function Settings() {
     try {
       saveLocalProfile({ name: displayName || undefined })
 
+      const supabase = await getSupabase()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
       const { error } = await supabase

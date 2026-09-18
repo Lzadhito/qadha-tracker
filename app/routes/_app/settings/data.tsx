@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { requireOnboarded } from "~/lib/guards"
-import { supabase } from "~/lib/supabase"
+import { getSupabase } from "~/lib/supabase"
 import { signOut } from "~/lib/auth"
 import { getLocalProfile } from "~/lib/local-profile"
 import { Button } from "~/components/ui/button"
@@ -31,6 +31,7 @@ export default function Data() {
   const handleExport = async () => {
     setExporting(true)
     try {
+      const supabase = await getSupabase()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
 
@@ -70,6 +71,7 @@ export default function Data() {
     setDeleting(true)
     try {
       // Call RPC to cascade-delete user data + auth.users row
+      const supabase = await getSupabase()
       const { error } = await supabase.rpc("delete_account")
       if (error) throw error
       await signOut()

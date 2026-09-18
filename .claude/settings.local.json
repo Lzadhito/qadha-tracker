@@ -9,7 +9,8 @@
       "Bash(npm test *)",
       "Bash(gh repo *)",
       "PowerShell(gh *)",
-      "Bash(xargs -I{} echo {})"
+      "Bash(xargs -I{} echo {})",
+      "Bash(curl -s https://qadhatracker.netlify.app/assets/index-DhSlXTTO.js https://qadhatracker.netlify.app/assets/index-BbqqHdLt.js)"
     ]
   }
 }

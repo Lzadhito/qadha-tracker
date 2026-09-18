@@ -5,7 +5,8 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
 import { Separator } from "~/components/ui/separator"
-import { usePrayerAdjust, useFastingAdjust } from "~/lib/queries/use-log-mutation"
+import { toast } from "sonner"
+import { adjustFasting, adjustPrayers } from "~/lib/log-actions"
 import { PRAYERS } from "~/lib/queries/use-remaining"
 import type { Prayer } from "~/lib/queries/use-remaining"
 
@@ -26,9 +27,6 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
   const [fastingValue, setFastingValue] = useState("")
   const [addDays, setAddDays] = useState("")
 
-  const prayerAdjust = usePrayerAdjust()
-  const fastingAdjust = useFastingAdjust()
-
   useEffect(() => {
     if (open) {
       const vals = {} as Record<Prayer, string>
@@ -39,16 +37,15 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
     }
   }, [open, prayerRows, fastingRemaining])
 
-  const handleAddDays = async () => {
+  const handleAddDays = () => {
     const days = Math.max(0, Number(addDays) || 0)
     if (days === 0) return
-    await prayerAdjust.mutateAsync({
-      adjustments: PRAYERS.map((prayer) => ({ prayer, delta: days })),
-    })
+    adjustPrayers(PRAYERS.map((prayer) => ({ prayer, delta: days })))
+    toast.success("Remaining adjusted.")
     setAddDays("")
   }
 
-  const handleSave = async () => {
+  const handleSave = () => {
     const prayerAdjustments = PRAYERS
       .map((p) => ({
         prayer: p,
@@ -58,21 +55,13 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
 
     const fastingDelta = (Number(fastingValue) || 0) - fastingRemaining
 
-    const promises: Promise<unknown>[] = []
-    if (prayerAdjustments.length > 0) {
-      promises.push(prayerAdjust.mutateAsync({ adjustments: prayerAdjustments }))
+    if (prayerAdjustments.length > 0 || fastingDelta !== 0) {
+      adjustPrayers(prayerAdjustments)
+      adjustFasting(fastingDelta)
+      toast.success("Remaining adjusted.")
     }
-    if (fastingDelta !== 0) {
-      promises.push(fastingAdjust.mutateAsync({ delta: fastingDelta }))
-    }
-
-    if (promises.length === 0) { onOpenChange(false); return }
-
-    await Promise.all(promises)
     onOpenChange(false)
   }
-
-  const isPending = prayerAdjust.isPending || fastingAdjust.isPending
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -97,7 +86,7 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
                 className="w-28"
               />
               <span className="text-sm text-muted-foreground">{t("adjust.days")}</span>
-              <Button size="sm" onClick={handleAddDays} disabled={isPending || !addDays || Number(addDays) <= 0}>
+              <Button size="sm" onClick={handleAddDays} disabled={!addDays || Number(addDays) <= 0}>
                 {t("adjust.add")}
               </Button>
             </div>
@@ -138,8 +127,8 @@ export function AdjustSheet({ open, onOpenChange, prayerRows, fastingRemaining }
             </div>
           </div>
 
-          <Button className="w-full" onClick={handleSave} disabled={isPending}>
-            {isPending ? t("common.saving") : t("adjust.saveAdjustments")}
+          <Button className="w-full" onClick={handleSave}>
+            {t("adjust.saveAdjustments")}
           </Button>
         </div>
       </SheetContent>

@@ -1,9 +1,10 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
-import { supabase } from "~/lib/supabase"
+import { getSupabase } from "~/lib/supabase"
 
 async function resolvePostAuth(userId: string) {
+  const supabase = await getSupabase()
   const { data: profile } = await supabase
     .from("profiles")
     .select("user_id, onboarded_at")
@@ -27,43 +28,54 @@ export default function Callback() {
   const { t } = useTranslation()
 
   useEffect(() => {
-    const url = new URL(window.location.href)
-    const code = url.searchParams.get("code")
+    let cancelled = false
+    let cleanup = () => {}
 
-    if (code) {
-      // PKCE flow (Google OAuth)
-      supabase.auth.exchangeCodeForSession(code).then(async ({ data, error }) => {
-        if (error || !data.user) {
-          navigate("/auth/sign-in")
-          return
-        }
-        const dest = await resolvePostAuth(data.user.id)
-        navigate(dest)
-      })
-      return
-    }
+    getSupabase().then((supabase) => {
+      if (cancelled) return
+      const url = new URL(window.location.href)
+      const code = url.searchParams.get("code")
 
-    // Hash-based magic link: supabase-js auto-sets session from URL hash.
-    // Listen for the SIGNED_IN event it fires.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === "SIGNED_IN" && session?.user) {
-          subscription.unsubscribe()
-          const dest = await resolvePostAuth(session.user.id)
+      if (code) {
+        // PKCE flow (Google OAuth)
+        supabase.auth.exchangeCodeForSession(code).then(async ({ data, error }) => {
+          if (error || !data.user) {
+            navigate("/auth/sign-in")
+            return
+          }
+          const dest = await resolvePostAuth(data.user.id)
           navigate(dest)
-        }
+        })
+        return
       }
-    )
 
-    // Timeout fallback if no event fires (e.g. stale/invalid link)
-    const timeout = setTimeout(() => {
-      subscription.unsubscribe()
-      navigate("/auth/sign-in")
-    }, 5000)
+      // Hash-based magic link: supabase-js auto-sets session from URL hash.
+      // Listen for the SIGNED_IN event it fires.
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (event === "SIGNED_IN" && session?.user) {
+            subscription.unsubscribe()
+            const dest = await resolvePostAuth(session.user.id)
+            navigate(dest)
+          }
+        }
+      )
+
+      // Timeout fallback if no event fires (e.g. stale/invalid link)
+      const timeout = setTimeout(() => {
+        subscription.unsubscribe()
+        navigate("/auth/sign-in")
+      }, 5000)
+
+      cleanup = () => {
+        subscription.unsubscribe()
+        clearTimeout(timeout)
+      }
+    })
 
     return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
+      cancelled = true
+      cleanup()
     }
   }, [navigate])
 

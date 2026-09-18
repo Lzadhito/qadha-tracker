@@ -50,7 +50,9 @@
     "qadhaRemaining_one": "+Qadha remaining {{count}} prayer today",
     "qadhaRemaining_other": "+Qadha remaining {{count}} prayers today",
     "qadhaFullDay": "+Qadha full day (all 5)",
-    "adjustRemaining": "Adjust remaining"
+    "adjustRemaining": "Adjust remaining",
+    "pendingSync_one": "{{count}} log waiting to sync",
+    "pendingSync_other": "{{count}} logs waiting to sync"
   },
   "prayerCard": {
     "remaining": "{{duration}} remaining",

@@ -1,45 +1,17 @@
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { format } from "date-fns"
 import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
-import { Calendar } from "~/components/ui/calendar"
-import { useFastingLog } from "~/lib/queries/use-log-mutation"
-
-function nowTimeStr() {
-  const n = new Date()
-  return `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`
-}
+import { Skeleton } from "~/components/ui/skeleton"
 
 interface FastingCardProps {
-  remaining: number
+  // undefined while the first fetch is in flight: logging still works, only the count waits
+  remaining: number | undefined
+  onLog: () => void
 }
 
-export function FastingCard({ remaining }: FastingCardProps) {
+export function FastingCard({ remaining, onLog }: FastingCardProps) {
   const { t } = useTranslation()
-  const [qadhaOpen, setQadhaOpen] = useState(false)
-  const [qadhaDate, setQadhaDate] = useState<Date | undefined>()
-  const [qadhaTime, setQadhaTime] = useState("12:00")
-  const log = useFastingLog()
 
-  const buildLoggedAt = (date: Date, time: string): string => {
-    const [h, m] = time.split(":").map(Number)
-    const d = new Date(date)
-    d.setHours(h, m, 0, 0)
-    return d.toISOString()
-  }
-
-  const logQadha = (date?: Date, time?: string) => {
-    const loggedAt = date ? buildLoggedAt(date, time ?? "12:00") : undefined
-    log.mutate({ entryType: "qadha", amount: 1, loggedAt })
-    setQadhaOpen(false)
-    setQadhaDate(undefined)
-    setQadhaTime("12:00")
-  }
-
-  if (remaining <= 0) {
+  if (remaining !== undefined && remaining <= 0) {
     return (
       <div className="flex items-center justify-between py-3 px-1">
         <span className="font-medium text-sm">{t("fastingCard.label")}</span>
@@ -53,51 +25,16 @@ export function FastingCard({ remaining }: FastingCardProps) {
       <div className="flex items-center justify-between mb-2">
         <div>
           <p className="font-medium text-sm">{t("fastingCard.label")}</p>
-          <p className="text-muted-foreground text-xs">{t("fastingCard.daysRemaining", { count: remaining })}</p>
+          {remaining === undefined ? (
+            <Skeleton className="h-3 w-36 mt-1" />
+          ) : (
+            <p className="text-muted-foreground text-xs">{t("fastingCard.daysRemaining", { count: remaining })}</p>
+          )}
         </div>
-        <Button size="sm" onClick={() => setQadhaOpen(true)} disabled={log.isPending} className="h-9 min-w-[90px]">
+        <Button size="sm" onClick={onLog} className="h-9 min-w-[90px]">
           {t("fastingCard.log1Fast")}
         </Button>
       </div>
-
-      <Sheet open={qadhaOpen} onOpenChange={setQadhaOpen}>
-        <SheetContent side="bottom">
-          <SheetHeader>
-            <SheetTitle>{t("fastingCard.whenFast")}</SheetTitle>
-          </SheetHeader>
-          <div className="py-4 space-y-3 px-4">
-            <Button className="w-full" onClick={() => logQadha()}>
-              {t("common.rightNow")}
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="flex-1 border-t border-border" />
-              <span className="text-xs text-muted-foreground">{t("fastingCard.orChooseDateTime")}</span>
-              <div className="flex-1 border-t border-border" />
-            </div>
-            <Calendar
-              mode="single"
-              selected={qadhaDate}
-              onSelect={(d) => { setQadhaDate(d); if (d) setQadhaTime(nowTimeStr()) }}
-              disabled={(d) => d > new Date()}
-              className="mx-auto"
-            />
-            {qadhaDate && (
-              <div className="space-y-1">
-                <Label className="text-xs">{t("fastingCard.time")}</Label>
-                <Input type="time" value={qadhaTime} onChange={(e) => setQadhaTime(e.target.value)} />
-              </div>
-            )}
-            <Button
-              variant="outline"
-              className="w-full"
-              disabled={!qadhaDate || log.isPending}
-              onClick={() => qadhaDate && logQadha(qadhaDate, qadhaTime)}
-            >
-              {qadhaDate ? t("fastingCard.logForAt", { date: format(qadhaDate, "d MMM yyyy"), time: qadhaTime }) : t("fastingCard.selectDateAbove")}
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   )
 }

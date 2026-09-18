@@ -1,3 +1,4 @@
+import { useEffect, useState, type ComponentType } from "react"
 import {
   Links,
   Meta,
@@ -6,22 +7,29 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
 } from "react-router"
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "next-themes"
 import { useTranslation } from "react-i18next"
-import { Toaster } from "~/components/ui/sonner"
 import { Skeleton } from "~/components/ui/skeleton"
 import "~/lib/i18n"
+import { queryClient } from "~/lib/query-client"
 
 import type { Route } from "./+types/root"
 import "./app.css"
-
-const queryClient = new QueryClient()
 
 export const meta: Route.MetaFunction = () => [
   { title: "Qadha Tracker" },
   { name: "description", content: "Track your qadha prayers and fasts." },
 ]
+
+// Toasts only ever follow a user action or a failed sync, so sonner loads after first paint.
+function DeferredToaster() {
+  const [Toaster, setToaster] = useState<ComponentType | null>(null)
+  useEffect(() => {
+    import("~/components/ui/sonner").then((m) => setToaster(() => m.Toaster))
+  }, [])
+  return Toaster ? <Toaster /> : null
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation()
@@ -39,7 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryClientProvider client={queryClient}>
             {children}
-            <Toaster />
+            <DeferredToaster />
           </QueryClientProvider>
         </ThemeProvider>
         <ScrollRestoration />

@@ -5,7 +5,7 @@ import type { DateRange } from "react-day-picker"
 import { Button } from "~/components/ui/button"
 import { Calendar } from "~/components/ui/calendar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
-import { useLogRemainingToday } from "~/lib/queries/use-log-mutation"
+import { logRemainingToday } from "~/lib/log-actions"
 import { PRAYERS, getRemainingPrayers, resolveExclude, useDatePrayerLog, wibDateStr } from "~/lib/queries/use-remaining"
 import type { Prayer } from "~/lib/queries/use-remaining"
 
@@ -22,7 +22,6 @@ function formatDate(d: Date) {
 export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheetProps) {
   const { t } = useTranslation()
   const [range, setRange] = useState<DateRange | undefined>()
-  const log = useLogRemainingToday()
 
   // Determine if a single past date is selected
   const singleFrom = range?.from
@@ -57,12 +56,9 @@ export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheet
         return local.toISOString()
       })
     }
-    log.mutate({ exclude, loggedDates }, {
-      onSuccess: () => {
-        onOpenChange(false)
-        setRange(undefined)
-      },
-    })
+    logRemainingToday(exclude, loggedDates)
+    onOpenChange(false)
+    setRange(undefined)
   }
 
   const rangeLabel = () => {
@@ -84,7 +80,7 @@ export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheet
         </SheetHeader>
         <div className="py-4 space-y-3 px-4">
           {!range?.from && (
-            <Button className="w-full" onClick={() => logDays()} disabled={log.isPending}>
+            <Button className="w-full" onClick={() => logDays()}>
               {t("remaining.rightNowToday", { count: getRemainingPrayers(todayDone).length })}
             </Button>
           )}
@@ -111,7 +107,7 @@ export function RemainingSheet({ open, onOpenChange, todayDone }: RemainingSheet
               {!isLoading && (remainingCount > 0 || !isSingleDate) && (
                 <Button
                   className="w-full"
-                  disabled={log.isPending || isLoading}
+                  disabled={isLoading}
                   onClick={() => logDays(range)}
                 >
                   {rangeLabel()}

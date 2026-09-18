@@ -50,7 +50,9 @@
     "qadhaRemaining_one": "+Qadha sisa {{count}} shalat hari ini",
     "qadhaRemaining_other": "+Qadha sisa {{count}} shalat hari ini",
     "qadhaFullDay": "+Qadha satu hari penuh (semua 5)",
-    "adjustRemaining": "Sesuaikan sisa"
+    "adjustRemaining": "Sesuaikan sisa",
+    "pendingSync_one": "{{count}} catatan menunggu sinkron",
+    "pendingSync_other": "{{count}} catatan menunggu sinkron"
   },
   "prayerCard": {
     "remaining": "{{duration}} tersisa",
