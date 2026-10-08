@@ -11,7 +11,7 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "next-themes"
 import { useTranslation } from "react-i18next"
 import { Skeleton } from "~/components/ui/skeleton"
-import "~/lib/i18n"
+import i18n from "~/lib/i18n"
 import { queryClient } from "~/lib/query-client"
 
 import type { Route } from "./+types/root"
@@ -31,7 +31,28 @@ function DeferredToaster() {
   return Toaster ? <Toaster /> : null
 }
 
+// Registers the offline worker after first paint. A new deploy waits (registerType "prompt") until
+// the user taps Reload, so the page never swaps builds under an in-progress log.
+function useServiceWorker() {
+  useEffect(() => {
+    if (import.meta.env.DEV) return
+    import("virtual:pwa-register").then(({ registerSW }) => {
+      const update = registerSW({
+        onNeedRefresh() {
+          import("sonner").then(({ toast }) =>
+            toast(i18n.t("common.updateAvailable"), {
+              duration: Infinity,
+              action: { label: i18n.t("common.reload"), onClick: () => update(true) },
+            })
+          )
+        },
+      })
+    })
+  }, [])
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  useServiceWorker()
   const { i18n } = useTranslation()
   return (
     <html lang={i18n.language ?? "en"} suppressHydrationWarning>
@@ -40,6 +61,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#2d5a3d" />
         <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <Meta />
         <Links />
       </head>

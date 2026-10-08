@@ -9,7 +9,9 @@
     "saving": "Saving...",
     "loading": "Loading...",
     "or": "Or",
-    "rightNow": "Right now"
+    "rightNow": "Right now",
+    "updateAvailable": "A new version is available.",
+    "reload": "Reload"
   },
   "auth": {
     "title": "Qadha Tracker",

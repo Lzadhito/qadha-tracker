@@ -65,6 +65,20 @@ npm start
 npm test
 ```
 
+### Test the PWA locally
+
+The service worker only exists in production builds (it is off in `npm run dev`), and the app
+needs its Supabase env vars at build time.
+
+```bash
+npm run build
+npx serve -s build/client -l 4173   # -s = SPA fallback, like Netlify's /* rewrite
+```
+
+Open http://localhost:4173, let it load once, then in DevTools > Application check
+*Manifest* and *Service Workers*. Tick **Offline** in the Network tab and reload: the app should
+still open, and logging a prayer should queue until you go back online.
+
 ## Privacy — What Stays on Your Device
 
 Some personal data is intentionally **never sent to the database**. It is stored only in `localStorage` on the user's browser:
