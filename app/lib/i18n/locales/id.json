@@ -9,7 +9,9 @@
     "saving": "Menyimpan...",
     "loading": "Memuat...",
     "or": "Atau",
-    "rightNow": "Sekarang"
+    "rightNow": "Sekarang",
+    "updateAvailable": "Versi baru tersedia.",
+    "reload": "Muat ulang"
   },
   "auth": {
     "title": "Qadha Tracker",
