@@ -123,7 +123,7 @@ describe("outbox sync", () => {
   it("undo of a log that never synced cancels it locally", async () => {
     const m = await load()
     handler.current = () => ({ error: { code: "", message: "offline" } })
-    m.logFullDay()
+    m.logPrayers(m.PRAYERS)
     await vi.waitFor(() => expect(console.warn).toHaveBeenCalled())
     fake.requests.length = 0
 

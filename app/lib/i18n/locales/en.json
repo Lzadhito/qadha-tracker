@@ -50,7 +50,6 @@
     "title": "Daily Log",
     "prayerLeft": "{{duration}} of prayer qadha left",
     "fastingLeft": "{{duration}} of fasting qadha left",
-    "qadhaFullDay": "+Qadha full day (all 5)",
     "adjustRemaining": "Adjust remaining",
     "pendingSync_one": "{{count}} log waiting to sync",
     "pendingSync_other": "{{count}} logs waiting to sync",
@@ -82,15 +81,6 @@
     "time": "Time",
     "logForAt": "Log for {{date}} at {{time}}",
     "selectDateAbove": "Select a date above"
-  },
-  "fullDay": {
-    "title": "Log full day — all 5 prayers",
-    "desc": "Logs 1 qadha for Fajr, Dhuhr, Asr, Maghrib, and Isha for each selected day.",
-    "todayNow": "Today (right now)",
-    "orChooseDates": "or choose date(s)",
-    "selectDates": "Select date(s) above",
-    "logFor": "Log for {{date}}",
-    "logRange": "Log {{from}} – {{to}} ({{count}} days)"
   },
   "adjust": {
     "title": "Adjust remaining qadha",
@@ -259,6 +249,8 @@
     "pick": "Prayers you made up on {{date}}",
     "selectAll": "Select all remaining",
     "save_one": "Save {{count}} prayer",
-    "save_other": "Save {{count}} prayers"
+    "save_other": "Save {{count}} prayers",
+    "pickRange": "Prayers you made up on {{from}} – {{to}} ({{count}} days)",
+    "saveDays": "Save {{count}} per day × {{days}} days"
   }
 }

@@ -1,7 +1,7 @@
 import { readStoredSession } from "./supabase"
 import { cancelUnsentQadha, enqueue, type LedgerRow, type LedgerTable } from "./outbox"
 import { flushOutbox } from "./sync"
-import { PRAYERS, type Prayer } from "./queries/use-remaining"
+import { type Prayer } from "./queries/use-remaining"
 import { wibDateKey } from "./wib"
 
 // Every log action is synchronous and local: it lands in the outbox (shown immediately) and the
@@ -44,10 +44,6 @@ export function logPrayer(prayer: Prayer, loggedDates?: string[]) {
 // Any subset of prayers, e.g. the ones ticked in the day-first sheet.
 export function logPrayers(prayers: readonly Prayer[], loggedDates?: string[]) {
   record("prayer_ledger", qadhaRows(prayers, loggedDates))
-}
-
-export function logFullDay(loggedDates?: string[]) {
-  record("prayer_ledger", qadhaRows(PRAYERS, loggedDates))
 }
 
 export function undoTodayPrayer(prayer: Prayer) {

@@ -50,7 +50,6 @@
     "title": "Catatan Harian",
     "prayerLeft": "Sisa qadha shalat {{duration}}",
     "fastingLeft": "Sisa qadha puasa {{duration}}",
-    "qadhaFullDay": "+Qadha satu hari penuh (semua 5)",
     "adjustRemaining": "Sesuaikan sisa",
     "pendingSync_one": "{{count}} catatan menunggu sinkron",
     "pendingSync_other": "{{count}} catatan menunggu sinkron",
@@ -82,15 +81,6 @@
     "time": "Waktu",
     "logForAt": "Catat untuk {{date}} pukul {{time}}",
     "selectDateAbove": "Pilih tanggal di atas"
-  },
-  "fullDay": {
-    "title": "Catat satu hari penuh — semua 5 shalat",
-    "desc": "Mencatat 1 qadha untuk Subuh, Zuhur, Asar, Magrib, dan Isya untuk tiap hari yang dipilih.",
-    "todayNow": "Hari ini (sekarang)",
-    "orChooseDates": "atau pilih tanggal",
-    "selectDates": "Pilih tanggal di atas",
-    "logFor": "Catat untuk {{date}}",
-    "logRange": "Catat {{from}} – {{to}} ({{count}} hari)"
   },
   "adjust": {
     "title": "Sesuaikan sisa qadha",
@@ -259,6 +249,8 @@
     "pick": "Salat yang kamu qadha pada {{date}}",
     "selectAll": "Pilih semua yang tersisa",
     "save_one": "Simpan {{count}} salat",
-    "save_other": "Simpan {{count}} salat"
+    "save_other": "Simpan {{count}} salat",
+    "pickRange": "Salat yang kamu qadha pada {{from}} – {{to}} ({{count}} hari)",
+    "saveDays": "Simpan {{count}} per hari × {{days}} hari"
   }
 }

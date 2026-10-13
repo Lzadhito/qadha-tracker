@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { format } from "date-fns"
+import { eachDayOfInterval, format } from "date-fns"
 import { Check } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Calendar } from "~/components/ui/calendar"
@@ -16,21 +16,29 @@ interface DayLogSheetProps {
   todayDone: Set<Prayer>
 }
 
-// Day first, prayers second: "yesterday I did Dhuhr and Asr" in one sheet, one save.
+// Day(s) first, prayers second: "yesterday I did Dhuhr and Asr", or all five over a whole range
+// of days, in one sheet and one save.
 export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps) {
   const { t } = useTranslation()
-  const [dayKey, setDayKey] = useState(() => wibYesterdayKey())
+  const [range, setRange] = useState(() => ({ from: wibYesterdayKey(), to: wibYesterdayKey() }))
   const [selected, setSelected] = useState<Set<Prayer>>(new Set())
   const [showCalendar, setShowCalendar] = useState(false)
 
   const todayKey = wibDateKey()
-  const isToday = dayKey === todayKey
-  const dateLog = useDatePrayerLog(isToday ? null : dayKey)
-  const loading = !isToday && dateLog.data === undefined
-  const logged = isToday ? todayDone : (dateLog.data ?? new Set<Prayer>())
+  const [y, m, d] = range.from.split("-").map(Number)
+  const [y2, m2, d2] = range.to.split("-").map(Number)
+  const dayKeys = eachDayOfInterval({ start: new Date(y, m - 1, d), end: new Date(y2, m2 - 1, d2) }).map(
+    (day) => format(day, "yyyy-MM-dd")
+  )
+  const multiDay = dayKeys.length > 1
+  // Only a single day can show what is already logged; over a range every selected prayer is logged.
+  const isToday = !multiDay && range.from === todayKey
+  const dateLog = useDatePrayerLog(multiDay || isToday ? null : range.from)
+  const loading = !multiDay && !isToday && dateLog.data === undefined
+  const logged = multiDay ? new Set<Prayer>() : isToday ? todayDone : (dateLog.data ?? new Set<Prayer>())
 
-  const pickDay = (key: string) => {
-    setDayKey(key)
+  const pickDays = (from: string, to = from) => {
+    setRange({ from, to })
     setSelected(new Set())
   }
 
@@ -44,7 +52,7 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
   const close = (v: boolean) => {
     onOpenChange(v)
     if (!v) {
-      setDayKey(wibYesterdayKey())
+      setRange({ from: wibYesterdayKey(), to: wibYesterdayKey() })
       setSelected(new Set())
       setShowCalendar(false)
     }
@@ -52,11 +60,10 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
 
   const save = () => {
     const prayers = PRAYERS.filter((p) => selected.has(p) && !logged.has(p))
-    logPrayers(prayers, isToday ? undefined : [wibNoonIso(dayKey)])
+    logPrayers(prayers, isToday ? undefined : dayKeys.map(wibNoonIso))
     close(false)
   }
 
-  const [y, m, d] = dayKey.split("-").map(Number)
   const count = PRAYERS.filter((p) => selected.has(p) && !logged.has(p)).length
 
   return (
@@ -68,16 +75,16 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
         <div className="py-4 space-y-3 px-4">
           <div className="flex gap-2">
             <Button
-              variant={dayKey === todayKey ? "default" : "outline"}
+              variant={!multiDay && range.from === todayKey ? "default" : "outline"}
               className="flex-1"
-              onClick={() => pickDay(todayKey)}
+              onClick={() => pickDays(todayKey)}
             >
               {t("prayerCard.today")}
             </Button>
             <Button
-              variant={dayKey === wibYesterdayKey() ? "default" : "outline"}
+              variant={!multiDay && range.from === wibYesterdayKey() ? "default" : "outline"}
               className="flex-1"
-              onClick={() => pickDay(wibYesterdayKey())}
+              onClick={() => pickDays(wibYesterdayKey())}
             >
               {t("prayerCard.yesterday")}
             </Button>
@@ -87,16 +94,20 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
           </div>
           {showCalendar && (
             <Calendar
-              mode="single"
-              selected={new Date(y, m - 1, d)}
-              onSelect={(date) => date && pickDay(format(date, "yyyy-MM-dd"))}
+              mode="range"
+              selected={{ from: new Date(y, m - 1, d), to: new Date(y2, m2 - 1, d2) }}
+              onSelect={(r) => r?.from && pickDays(format(r.from, "yyyy-MM-dd"), format(r.to ?? r.from, "yyyy-MM-dd"))}
               disabled={(date) => date > new Date()}
               className="mx-auto"
             />
           )}
 
           <p className="text-xs text-muted-foreground">
-            {loading ? t("dayLog.checking") : t("dayLog.pick", { date: format(new Date(y, m - 1, d), "d MMM yyyy") })}
+            {loading
+              ? t("dayLog.checking")
+              : multiDay
+                ? t("dayLog.pickRange", { from: format(new Date(y, m - 1, d), "d MMM"), to: format(new Date(y2, m2 - 1, d2), "d MMM yyyy"), count: dayKeys.length })
+                : t("dayLog.pick", { date: format(new Date(y, m - 1, d), "d MMM yyyy") })}
           </p>
           <div className="grid grid-cols-5 gap-2">
             {PRAYERS.map((p) => {
@@ -127,7 +138,7 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
             {t("dayLog.selectAll")}
           </Button>
           <Button className="w-full" disabled={count === 0} onClick={save}>
-            {t("dayLog.save", { count })}
+            {multiDay ? t("dayLog.saveDays", { count, days: dayKeys.length }) : t("dayLog.save", { count })}
           </Button>
         </div>
       </SheetContent>
