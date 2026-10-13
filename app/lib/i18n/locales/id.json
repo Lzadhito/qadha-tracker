@@ -11,7 +11,8 @@
     "or": "Atau",
     "rightNow": "Sekarang",
     "updateAvailable": "Versi baru tersedia.",
-    "reload": "Muat ulang"
+    "reload": "Muat ulang",
+    "undo": "Batalkan"
   },
   "auth": {
     "title": "Qadha Tracker",
@@ -49,12 +50,11 @@
     "title": "Catatan Harian",
     "prayerLeft": "Sisa qadha shalat {{duration}}",
     "fastingLeft": "Sisa qadha puasa {{duration}}",
-    "qadhaRemaining_one": "+Qadha sisa {{count}} shalat hari ini",
-    "qadhaRemaining_other": "+Qadha sisa {{count}} shalat hari ini",
     "qadhaFullDay": "+Qadha satu hari penuh (semua 5)",
     "adjustRemaining": "Sesuaikan sisa",
     "pendingSync_one": "{{count}} catatan menunggu sinkron",
-    "pendingSync_other": "{{count}} catatan menunggu sinkron"
+    "pendingSync_other": "{{count}} catatan menunggu sinkron",
+    "logByDay": "Catat qadha per hari"
   },
   "prayerCard": {
     "remaining": "{{duration}} tersisa",
@@ -67,7 +67,10 @@
     "orChooseDates": "atau pilih tanggal",
     "selectDates": "Pilih tanggal di atas",
     "logFor": "Catat untuk {{date}}",
-    "logRange": "Catat {{from}} – {{to}} ({{count}} hari)"
+    "logRange": "Catat {{from}} – {{to}} ({{count}} hari)",
+    "logged": "{{prayer}} tercatat",
+    "pickDate": "Pilih tanggal",
+    "yesterday": "Kemarin"
   },
   "fastingCard": {
     "label": "Puasa",
@@ -79,18 +82,6 @@
     "time": "Waktu",
     "logForAt": "Catat untuk {{date}} pukul {{time}}",
     "selectDateAbove": "Pilih tanggal di atas"
-  },
-  "remaining": {
-    "title_one": "+Qadha sisa {{count}} shalat",
-    "title_other": "+Qadha sisa {{count}} shalat",
-    "rightNowToday": "Sekarang ({{count}} tersisa hari ini)",
-    "orPickDate": "atau pilih tanggal",
-    "checking": "Memeriksa shalat yang sudah dicatat…",
-    "allLogged": "Semua shalat sudah dicatat untuk hari ini.",
-    "selectDates": "Pilih tanggal di atas",
-    "logForDate_one": "Catat {{count}} shalat untuk {{date}}",
-    "logForDate_other": "Catat {{count}} shalat untuk {{date}}",
-    "logAllRange": "Catat semua shalat untuk {{from}} – {{to}} ({{count}} hari)"
   },
   "fullDay": {
     "title": "Catat satu hari penuh — semua 5 shalat",
@@ -260,5 +251,14 @@
       "submitting": "Menyimpan...",
       "genericError": "Terjadi kesalahan. Silakan coba lagi."
     }
+  },
+  "dayLog": {
+    "title": "Catat qadha per hari",
+    "otherDate": "Tanggal lain",
+    "checking": "Memeriksa salat yang tercatat…",
+    "pick": "Salat yang kamu qadha pada {{date}}",
+    "selectAll": "Pilih semua yang tersisa",
+    "save_one": "Simpan {{count}} salat",
+    "save_other": "Simpan {{count}} salat"
   }
 }

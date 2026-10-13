@@ -6,6 +6,7 @@ import { Button } from "~/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
 import { Calendar } from "~/components/ui/calendar"
 import { logPrayer } from "~/lib/log-actions"
+import { wibNoonIso, wibYesterdayKey } from "~/lib/wib"
 import type { Prayer } from "~/lib/queries/use-remaining"
 
 interface PrayerLogSheetProps {
@@ -29,15 +30,13 @@ export function PrayerLogSheet({ prayer, open, onOpenChange }: PrayerLogSheetPro
     setRange(undefined)
   }
 
-  const logQadha = (dates?: DateRange) => {
+  const logQadha = (dates?: DateRange, dateKey?: string) => {
     let loggedDates: string[] | undefined
-    if (dates?.from) {
+    if (dateKey) {
+      loggedDates = [wibNoonIso(dateKey)]
+    } else if (dates?.from) {
       const dayList = eachDayOfInterval({ start: dates.from, end: dates.to ?? dates.from })
-      loggedDates = dayList.map((d) => {
-        const local = new Date(d)
-        local.setHours(12, 0, 0, 0)
-        return local.toISOString()
-      })
+      loggedDates = dayList.map((d) => wibNoonIso(format(d, "yyyy-MM-dd")))
     }
     logPrayer(prayer, loggedDates)
     close()
@@ -61,9 +60,14 @@ export function PrayerLogSheet({ prayer, open, onOpenChange }: PrayerLogSheetPro
           <p className="text-xs text-muted-foreground">
             {t("prayerCard.selectOrDrag")}
           </p>
-          <Button className="w-full" onClick={() => logQadha()}>
-            {t("common.rightNow")}
-          </Button>
+          <div className="flex gap-2">
+            <Button className="flex-1" onClick={() => logQadha()}>
+              {t("prayerCard.today")}
+            </Button>
+            <Button variant="secondary" className="flex-1" onClick={() => logQadha(undefined, wibYesterdayKey())}>
+              {t("prayerCard.yesterday")}
+            </Button>
+          </div>
           <div className="flex items-center gap-3">
             <div className="flex-1 border-t border-border" />
             <span className="text-xs text-muted-foreground">{t("prayerCard.orChooseDates")}</span>

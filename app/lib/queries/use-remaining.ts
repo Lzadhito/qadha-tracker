@@ -231,31 +231,6 @@ export function useDatePrayerLog(dateKey: string | null) {
   return { data, isLoading: query.isLoading }
 }
 
-export function resolveExclude({
-  rangeFrom,
-  rangeTo,
-  todayKey,
-  todayDone,
-  fetchedDone,
-}: {
-  rangeFrom: Date | undefined
-  rangeTo: Date | undefined
-  todayKey: string
-  todayDone: Set<Prayer>
-  fetchedDone: Set<Prayer> | undefined
-}): Set<Prayer> {
-  if (!rangeFrom) return todayDone
-  const isSingle = !rangeTo || (
-    rangeFrom.getFullYear() === rangeTo.getFullYear() &&
-    rangeFrom.getMonth() === rangeTo.getMonth() &&
-    rangeFrom.getDate() === rangeTo.getDate()
-  )
-  if (!isSingle) return new Set()
-  const dateKey = `${rangeFrom.getFullYear()}-${String(rangeFrom.getMonth() + 1).padStart(2, "0")}-${String(rangeFrom.getDate()).padStart(2, "0")}`
-  if (dateKey === todayKey) return todayDone
-  return fetchedDone ?? new Set()
-}
-
 export function useFastingRemaining() {
   const query = useQuery({
     queryKey: ["fasting-remaining"],

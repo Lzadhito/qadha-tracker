@@ -27,8 +27,8 @@ const FastingLogSheet = lazy(() =>
 const FullDaySheet = lazy(() =>
   import("~/components/prayer/FullDaySheet").then((m) => ({ default: m.FullDaySheet }))
 )
-const RemainingSheet = lazy(() =>
-  import("~/components/prayer/RemainingSheet").then((m) => ({ default: m.RemainingSheet }))
+const DayLogSheet = lazy(() =>
+  import("~/components/prayer/DayLogSheet").then((m) => ({ default: m.DayLogSheet }))
 )
 const AdjustSheet = lazy(() =>
   import("~/components/prayer/AdjustSheet").then((m) => ({ default: m.AdjustSheet }))
@@ -48,11 +48,10 @@ export default function Log() {
   const [prayerSheetOpen, setPrayerSheetOpen] = useState(false)
   const [fastingSheetOpen, setFastingSheetOpen] = useState(false)
   const [fullDayOpen, setFullDayOpen] = useState(false)
-  const [remainingOpen, setRemainingOpen] = useState(false)
+  const [dayLogOpen, setDayLogOpen] = useState(false)
   const [adjustOpen, setAdjustOpen] = useState(false)
 
   const todayDone = todayLog.data
-  const remainingCount = PRAYERS.length - todayDone.size
 
   const prayerRemaining = prayers.data?.reduce((s, r) => s + r.remaining, 0) ?? 0
   const fastingRemaining = fasting.data?.displayRemaining ?? 0
@@ -89,15 +88,9 @@ export default function Log() {
 
       {/* Recording never waits on data: only the counts below fill in once loaded. */}
       <div className="flex flex-col gap-2 pb-2">
-        {todayDone.size > 0 && remainingCount > 0 && (
-          <Button
-            size="sm"
-            className="w-full text-xs"
-            onClick={() => setRemainingOpen(true)}
-          >
-            {t("log.qadhaRemaining", { count: remainingCount })}
-          </Button>
-        )}
+        <Button size="sm" className="w-full text-xs" onClick={() => setDayLogOpen(true)}>
+          {t("log.logByDay")}
+        </Button>
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -126,7 +119,7 @@ export default function Log() {
             prayer={p}
             remaining={prayers.data?.find((r) => r.prayer === p)?.displayRemaining}
             loggedToday={todayDone.has(p)}
-            onQadha={openPrayerSheet}
+            onPickDate={openPrayerSheet}
           />
         ))}
       </div>
@@ -141,11 +134,7 @@ export default function Log() {
         <PrayerLogSheet prayer={logPrayer} open={prayerSheetOpen} onOpenChange={setPrayerSheetOpen} />
         <FastingLogSheet open={fastingSheetOpen} onOpenChange={setFastingSheetOpen} />
         <FullDaySheet open={fullDayOpen} onOpenChange={setFullDayOpen} />
-        <RemainingSheet
-          open={remainingOpen}
-          onOpenChange={setRemainingOpen}
-          todayDone={todayDone}
-        />
+        <DayLogSheet open={dayLogOpen} onOpenChange={setDayLogOpen} todayDone={todayDone} />
         <AdjustSheet
           open={adjustOpen}
           onOpenChange={setAdjustOpen}

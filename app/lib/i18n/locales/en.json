@@ -11,7 +11,8 @@
     "or": "Or",
     "rightNow": "Right now",
     "updateAvailable": "A new version is available.",
-    "reload": "Reload"
+    "reload": "Reload",
+    "undo": "Undo"
   },
   "auth": {
     "title": "Qadha Tracker",
@@ -49,12 +50,11 @@
     "title": "Daily Log",
     "prayerLeft": "{{duration}} of prayer qadha left",
     "fastingLeft": "{{duration}} of fasting qadha left",
-    "qadhaRemaining_one": "+Qadha remaining {{count}} prayer today",
-    "qadhaRemaining_other": "+Qadha remaining {{count}} prayers today",
     "qadhaFullDay": "+Qadha full day (all 5)",
     "adjustRemaining": "Adjust remaining",
     "pendingSync_one": "{{count}} log waiting to sync",
-    "pendingSync_other": "{{count}} logs waiting to sync"
+    "pendingSync_other": "{{count}} logs waiting to sync",
+    "logByDay": "Log qadha by day"
   },
   "prayerCard": {
     "remaining": "{{duration}} remaining",
@@ -67,7 +67,10 @@
     "orChooseDates": "or choose date(s)",
     "selectDates": "Select date(s) above",
     "logFor": "Log for {{date}}",
-    "logRange": "Log {{from}} – {{to}} ({{count}} days)"
+    "logRange": "Log {{from}} – {{to}} ({{count}} days)",
+    "logged": "{{prayer}} logged",
+    "pickDate": "Pick a date",
+    "yesterday": "Yesterday"
   },
   "fastingCard": {
     "label": "Fasting",
@@ -79,18 +82,6 @@
     "time": "Time",
     "logForAt": "Log for {{date}} at {{time}}",
     "selectDateAbove": "Select a date above"
-  },
-  "remaining": {
-    "title_one": "+Qadha remaining {{count}} prayer",
-    "title_other": "+Qadha remaining {{count}} prayers",
-    "rightNowToday": "Right now ({{count}} remaining today)",
-    "orPickDate": "or pick a date",
-    "checking": "Checking logged prayers…",
-    "allLogged": "All prayers already logged for this day.",
-    "selectDates": "Select date(s) above",
-    "logForDate_one": "Log {{count}} prayer for {{date}}",
-    "logForDate_other": "Log {{count}} prayers for {{date}}",
-    "logAllRange": "Log all prayers for {{from}} – {{to}} ({{count}} days)"
   },
   "fullDay": {
     "title": "Log full day — all 5 prayers",
@@ -260,5 +251,14 @@
       "submitting": "Saving...",
       "genericError": "Something went wrong. Please try again."
     }
+  },
+  "dayLog": {
+    "title": "Log qadha by day",
+    "otherDate": "Other date",
+    "checking": "Checking logged prayers…",
+    "pick": "Prayers you made up on {{date}}",
+    "selectAll": "Select all remaining",
+    "save_one": "Save {{count}} prayer",
+    "save_other": "Save {{count}} prayers"
   }
 }

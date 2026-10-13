@@ -70,6 +70,18 @@ describe("outbox sync", () => {
     expect(JSON.parse(localStorage.getItem("qadha:outbox")!)).toHaveLength(1)
   })
 
+  it("logs exactly the chosen prayers, once each, on the given day", async () => {
+    const m = await load()
+    handler.current = () => new Promise(() => {}) as never
+    m.logPrayers(["zuhur", "asar"], ["2026-06-06T05:00:00.000Z"])
+    const [op] = m.getOps()
+    const rows = op.kind === "insert" ? op.rows : []
+    expect(rows.map((r) => r.prayer)).toEqual(["zuhur", "asar"])
+    expect(rows.every((r) => r.logged_at === "2026-06-06T05:00:00.000Z")).toBe(true)
+    m.logPrayers([])
+    expect(m.getOps()).toHaveLength(1)
+  })
+
   it("keeps the op while Supabase is unreachable and syncs it on a later flush", async () => {
     const m = await load()
     handler.current = () => ({ error: { code: "", message: "TypeError: Failed to fetch" } })

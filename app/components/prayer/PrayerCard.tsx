@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next"
-import { CheckCircle2, Undo2 } from "lucide-react"
+import { CalendarDays, CheckCircle2, Undo2 } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
-import { undoTodayPrayer } from "~/lib/log-actions"
+import { logPrayer, undoTodayPrayer } from "~/lib/log-actions"
 import { formatDaysLeft } from "~/lib/format"
 import type { Prayer } from "~/lib/queries/use-remaining"
 
@@ -11,12 +12,20 @@ interface PrayerCardProps {
   // undefined while the first fetch is in flight: logging still works, only the count waits
   remaining: number | undefined
   loggedToday: boolean
-  onQadha: (prayer: Prayer) => void
+  // opens the date sheet; a plain tap on +Qadha logs today without it
+  onPickDate: (prayer: Prayer) => void
 }
 
-export function PrayerCard({ prayer, remaining, loggedToday, onQadha }: PrayerCardProps) {
+export function PrayerCard({ prayer, remaining, loggedToday, onPickDate }: PrayerCardProps) {
   const { t } = useTranslation()
   const prayerName = t(`prayers.${prayer}`)
+
+  const logNow = () => {
+    logPrayer(prayer)
+    toast(t("prayerCard.logged", { prayer: prayerName }), {
+      action: { label: t("common.undo"), onClick: () => undoTodayPrayer(prayer) },
+    })
+  }
 
   return (
     <div className="flex items-center justify-between py-3 px-1 border-b border-border/40 last:border-0">
@@ -50,10 +59,20 @@ export function PrayerCard({ prayer, remaining, loggedToday, onQadha }: PrayerCa
           </span>
         )}
         <Button
+          size="icon"
+          variant="ghost"
+          className="h-9 w-9 text-muted-foreground"
+          onClick={() => onPickDate(prayer)}
+          title={t("prayerCard.pickDate")}
+          aria-label={t("prayerCard.pickDate")}
+        >
+          <CalendarDays className="h-4 w-4" />
+        </Button>
+        <Button
           size="sm"
           variant={remaining !== undefined && remaining <= 0 ? "outline" : "default"}
           className="h-9 min-w-[80px]"
-          onClick={() => onQadha(prayer)}
+          onClick={logNow}
         >
           {t("prayerCard.qadha")}
         </Button>
