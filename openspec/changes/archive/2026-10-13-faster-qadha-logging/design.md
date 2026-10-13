@@ -24,7 +24,7 @@ The action is cheap to reverse (`undoTodayPrayer` already exists and is idempote
 **2. The calendar becomes a secondary icon button on the card, not a gesture.**
 A visible icon is discoverable and works the same on touch and desktop. Alternative: long-press `+Qadha` to open the sheet; rejected because it is invisible and conflicts with scrolling on mobile.
 
-**3. A new day-first sheet replaces `RemainingSheet`; ranges stay with `FullDaySheet`.**
+**3. A new day-first sheet replaces `RemainingSheet`.** *(Update: commit 4cf8853 later folded `FullDaySheet`'s range logging into this sheet, so it now also accepts a range of days, where every selected prayer is logged for each day. Single-day behavior below is unchanged.)*
 `RemainingSheet` mixes three jobs (today's rest, one past day, range of days) behind a range calendar. The new sheet does one: single day, per-prayer toggles. "All prayers over a range" is exactly what `FullDaySheet` does, so the range mode is dropped as a duplicate. Reuse: `useDatePrayerLog(dateKey)` to know what's logged (it works for today too, with pending ops overlaid), and a new small `logPrayers(prayers, loggedDates)` helper on top of the existing `qadhaRows`/`record` to write a chosen subset (`logRemainingToday` takes an exclude set; a direct include list is simpler for toggles). Alternative: extend `RemainingSheet` with toggles; rejected because its range-calendar state machine is the complexity we want to remove.
 
 **4. Day choice is chips (`Today | Yesterday`) plus a single-select calendar behind an `Other date` expander.**
