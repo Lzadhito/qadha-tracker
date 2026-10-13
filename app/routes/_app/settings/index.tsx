@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { lazy, Suspense, useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { useTheme } from "next-themes"
@@ -15,7 +15,12 @@ import { Switch } from "~/components/ui/switch"
 import { Separator } from "~/components/ui/separator"
 import { Skeleton } from "~/components/ui/skeleton"
 import { ChevronRight } from "lucide-react"
+import { useFastingRemaining, usePrayerRemaining } from "~/lib/queries/use-remaining"
 import { toast } from "sonner"
+
+const AdjustSheet = lazy(() =>
+  import("~/components/prayer/AdjustSheet").then((m) => ({ default: m.AdjustSheet }))
+)
 
 export async function clientLoader() {
   return requireOnboarded()
@@ -48,6 +53,9 @@ export default function Settings() {
   const [displayName, setDisplayName] = useState("")
   const [locale, setLocale] = useState("en")
   const [timezone, setTimezone] = useState("Asia/Jakarta")
+  const prayers = usePrayerRemaining()
+  const fasting = useFastingRemaining()
+  const [adjustOpen, setAdjustOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -102,10 +110,15 @@ export default function Settings() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-      <h1 className="text-xl font-bold flex items-center gap-2">
+      <div>
+        <Button variant="ghost" size="sm" onClick={() => navigate("/log")} className="mb-4">
+          ← {t("common.back")}
+        </Button>
+        <h1 className="text-xl font-bold flex items-center gap-2">
         <img src="/sujud.svg" className="h-6 w-6" alt="" />
         {t("settings.title")}
-      </h1>
+        </h1>
+      </div>
 
       {/* Profile */}
       <div className="space-y-4">
@@ -173,6 +186,15 @@ export default function Settings() {
 
       {/* Nav links */}
       <div className="rounded-xl border border-border bg-card divide-y divide-border">
+        <button
+          type="button"
+          disabled={!prayers.data || !fasting.data}
+          onClick={() => setAdjustOpen(true)}
+          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors disabled:opacity-50"
+        >
+          <span className="text-sm">{t("log.adjustRemaining")}</span>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
         {LINKS.map(({ href, labelKey }) => (
           <Link
             key={href}
@@ -194,6 +216,15 @@ export default function Settings() {
       >
         {t("settings.signOut")}
       </Button>
+
+      <Suspense fallback={null}>
+        <AdjustSheet
+          open={adjustOpen}
+          onOpenChange={setAdjustOpen}
+          prayerRows={prayers.data ?? []}
+          fastingRemaining={fasting.data?.displayRemaining ?? 0}
+        />
+      </Suspense>
     </div>
   )
 }

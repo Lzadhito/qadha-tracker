@@ -41,10 +41,7 @@
     "day_other": "{{count}} hari"
   },
   "nav": {
-    "log": "Log",
-    "history": "Riwayat",
-    "settings": "Pengaturan",
-    "brand": "Qadha Tracker"
+    "settings": "Pengaturan"
   },
   "log": {
     "title": "Catatan Harian",
@@ -252,5 +249,10 @@
     "save_other": "Simpan {{count}} salat",
     "pickRange": "Salat yang kamu qadha pada {{from}} – {{to}} ({{count}} hari)",
     "saveDays": "Simpan {{count}} per hari × {{days}} hari"
+  },
+  "calendar": {
+    "hasQadha": "ada qadha",
+    "empty": "Tidak ada qadha di hari ini.",
+    "viewHistory": "Lihat riwayat"
   }
 }

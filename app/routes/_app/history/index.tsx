@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react"
-import { Link } from "react-router"
+import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { requireOnboarded } from "~/lib/guards"
 import { useHistory } from "~/lib/queries/use-history"
-import { formatLedgerDate } from "~/lib/format"
+import { HistoryRow } from "~/components/history/HistoryRow"
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs"
+import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
 import type { ObligationType, EntryType } from "~/lib/queries/use-history"
 
@@ -14,11 +15,11 @@ export async function clientLoader() {
 
 export default function History() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [obligation, setObligation] = useState<ObligationType>("all")
   const [entryType, setEntryType] = useState<EntryType>("all")
   const bottomRef = useRef<HTMLDivElement>(null)
   const entryLabel = (type: string) => t(`history.${type}`, { defaultValue: type })
-  const prayerLabel = (p: string) => t(`prayers.${p}`, { defaultValue: p })
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useHistory(obligation, entryType)
@@ -37,6 +38,9 @@ export default function History() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6">
+      <Button variant="ghost" size="sm" onClick={() => navigate("/log")} className="mb-4">
+        ← {t("common.back")}
+      </Button>
       <h1 className="text-xl font-bold mb-4 flex items-center gap-2">
         <img src="/sujud.svg" className="h-6 w-6" alt="" />
         {t("history.title")}
@@ -66,28 +70,7 @@ export default function History() {
               <Skeleton key={i} className="h-14 w-full rounded-lg" />
             ))
           : entries.map((entry) => (
-              <Link
-                key={`${entry.obligation}-${entry.id}`}
-                to={`/history/${entry.obligation}-${entry.id}`}
-                className="flex items-center justify-between px-4 py-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-medium">
-                    {entry.obligation === "prayer"
-                      ? `${prayerLabel((entry as any).prayer)} — ${entryLabel(entry.entry_type)}`
-                      : `${t("history.fastingType")} — ${entryLabel(entry.entry_type)}`}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatLedgerDate(entry.logged_at)}
-                  </p>
-                </div>
-                <span
-                  className={`text-sm font-mono ${entry.amount < 0 ? "text-primary" : "text-foreground/70"}`}
-                >
-                  {entry.amount > 0 ? "+" : ""}
-                  {entry.amount}
-                </span>
-              </Link>
+              <HistoryRow key={`${entry.obligation}-${entry.id}`} entry={entry} />
             ))}
       </div>
 

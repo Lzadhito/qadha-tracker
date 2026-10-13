@@ -41,10 +41,7 @@
     "day_other": "{{count}} days"
   },
   "nav": {
-    "log": "Log",
-    "history": "History",
-    "settings": "Settings",
-    "brand": "Qadha Tracker"
+    "settings": "Settings"
   },
   "log": {
     "title": "Daily Log",
@@ -252,5 +249,10 @@
     "save_other": "Save {{count}} prayers",
     "pickRange": "Prayers you made up on {{from}} – {{to}} ({{count}} days)",
     "saveDays": "Save {{count}} per day × {{days}} days"
+  },
+  "calendar": {
+    "hasQadha": "qadha done",
+    "empty": "No qadha on this day.",
+    "viewHistory": "View history"
   }
 }

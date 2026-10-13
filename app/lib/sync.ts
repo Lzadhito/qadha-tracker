@@ -103,7 +103,7 @@ async function drain() {
     }
   } finally {
     if (synced) {
-      for (const key of ["prayer-remaining", "fasting-remaining", "prayer-today", "prayer-date", "history"]) {
+      for (const key of ["prayer-remaining", "fasting-remaining", "prayer-today", "prayer-date", "history", "month-qadha"]) {
         queryClient.invalidateQueries({ queryKey: [key] })
       }
     }

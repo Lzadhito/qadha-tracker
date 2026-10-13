@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from "react"
+import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
 import { CloudUpload, Settings } from "lucide-react"
 import { requireOnboarded } from "~/lib/guards"
@@ -14,6 +15,7 @@ import { formatTodayDate, formatDaysLeft } from "~/lib/format"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { Button } from "~/components/ui/button"
+import { Skeleton } from "~/components/ui/skeleton"
 import { Separator } from "~/components/ui/separator"
 
 // Sheets pull in the dialog, calendar and date-fns. They render (closed) on mount, which starts
@@ -27,8 +29,8 @@ const FastingLogSheet = lazy(() =>
 const DayLogSheet = lazy(() =>
   import("~/components/prayer/DayLogSheet").then((m) => ({ default: m.DayLogSheet }))
 )
-const AdjustSheet = lazy(() =>
-  import("~/components/prayer/AdjustSheet").then((m) => ({ default: m.AdjustSheet }))
+const QadhaCalendar = lazy(() =>
+  import("~/components/calendar/QadhaCalendar").then((m) => ({ default: m.QadhaCalendar }))
 )
 
 export async function clientLoader() {
@@ -45,7 +47,6 @@ export default function Log() {
   const [prayerSheetOpen, setPrayerSheetOpen] = useState(false)
   const [fastingSheetOpen, setFastingSheetOpen] = useState(false)
   const [dayLogOpen, setDayLogOpen] = useState(false)
-  const [adjustOpen, setAdjustOpen] = useState(false)
 
   const todayDone = todayLog.data
 
@@ -69,15 +70,10 @@ export default function Log() {
           <img src="/sujud.svg" className="h-6 w-6" alt="" />
           {t("log.title")}
         </h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          disabled={!prayers.data || !fasting.data}
-          onClick={() => setAdjustOpen(true)}
-          title={t("log.adjustRemaining")}
-          aria-label={t("log.adjustRemaining")}
-        >
-          <Settings className="h-5 w-5" />
+        <Button asChild variant="ghost" size="icon" title={t("nav.settings")}>
+          <Link to="/settings" aria-label={t("nav.settings")}>
+            <Settings className="h-5 w-5" />
+          </Link>
         </Button>
       </div>
 
@@ -119,16 +115,19 @@ export default function Log() {
         <FastingCard remaining={fasting.data?.displayRemaining} onLog={() => setFastingSheetOpen(true)} />
       </div>
 
+      <Separator className="my-4" />
+
+      <Suspense fallback={<Skeleton className="h-[22rem] w-full rounded-xl" />}>
+        <QadhaCalendar />
+      </Suspense>
+      <Button asChild variant="ghost" className="w-full mt-2 text-muted-foreground">
+        <Link to="/history">{t("calendar.viewHistory")}</Link>
+      </Button>
+
       <Suspense fallback={null}>
         <PrayerLogSheet prayer={logPrayer} open={prayerSheetOpen} onOpenChange={setPrayerSheetOpen} />
         <FastingLogSheet open={fastingSheetOpen} onOpenChange={setFastingSheetOpen} />
         <DayLogSheet open={dayLogOpen} onOpenChange={setDayLogOpen} todayDone={todayDone} />
-        <AdjustSheet
-          open={adjustOpen}
-          onOpenChange={setAdjustOpen}
-          prayerRows={prayers.data ?? []}
-          fastingRemaining={fastingRemaining}
-        />
       </Suspense>
     </div>
   )

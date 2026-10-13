@@ -73,7 +73,7 @@ async function requireSession() {
   return { supabase, session }
 }
 
-function usePendingOps(): Op[] {
+export function usePendingOps(): Op[] {
   const ops = useSyncExternalStore(subscribe, getOps, getServerOps)
   const uid = readStoredSession()?.user.id
   return useMemo(() => ops.filter((op) => op.uid === uid), [ops, uid])

@@ -107,6 +107,7 @@ export function useDeleteEntry() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["history"] })
+      qc.invalidateQueries({ queryKey: ["month-qadha"] })
       qc.invalidateQueries({ queryKey: ["prayer-remaining"] })
       qc.invalidateQueries({ queryKey: ["fasting-remaining"] })
     },
