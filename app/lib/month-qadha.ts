@@ -55,3 +55,8 @@ export function groupByDay(entries: QadhaEntry[]): Map<string, QadhaEntry[]> {
   for (const list of days.values()) list.sort((a, b) => b.logged_at.localeCompare(a.logged_at))
   return days
 }
+
+// How many qadha were done per day. Amounts are stored negative (-1 per qadha), so use the size.
+export function countByDay(days: Map<string, QadhaEntry[]>): Map<string, number> {
+  return new Map([...days].map(([day, list]) => [day, list.reduce((n, e) => n + Math.abs(e.amount), 0)]))
+}

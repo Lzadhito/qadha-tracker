@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { groupByDay, mergePendingQadha, qadhaDay, type QadhaEntry } from "./month-qadha"
+import { countByDay, groupByDay, mergePendingQadha, qadhaDay, type QadhaEntry } from "./month-qadha"
 import type { Op } from "./outbox"
 
 const entry = (id: string, prayer: QadhaEntry["prayer"], logged_at: string): QadhaEntry => ({
@@ -50,5 +50,25 @@ describe("mergePendingQadha", () => {
     const e = entry("a", "asar", "2026-10-13T08:00:00Z")
     const undo: Op = { id: "u1", uid: "u", kind: "undo", prayer: "asar", dateKey: "2026-10-13", targetId: null }
     expect(mergePendingQadha([e], [undo], "2026-10")).toEqual([e])
+  })
+})
+
+describe("countByDay", () => {
+  const fast = (id: string, day: string, amount: number): QadhaEntry => ({
+    id, obligation: "fasting", entry_type: "qadha", amount, logged_at: `${day}T05:00:00Z`, day,
+  })
+
+  it("sums prayers and fasts, using the size of each amount", () => {
+    const days = groupByDay([
+      entry("a", "subuh", "2026-10-12T00:00:00Z"),
+      entry("b", "zuhur", "2026-10-12T05:00:00Z"),
+      fast("c", "2026-10-12", -2),
+      entry("d", "isya", "2026-10-13T00:00:00Z"),
+    ])
+    expect(countByDay(days)).toEqual(new Map([["2026-10-12", 4], ["2026-10-13", 1]]))
+  })
+
+  it("has no key for a day without qadha", () => {
+    expect(countByDay(new Map()).size).toBe(0)
   })
 })

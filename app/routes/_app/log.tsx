@@ -12,6 +12,7 @@ import {
   type Prayer,
 } from "~/lib/queries/use-remaining"
 import { formatTodayDate, formatDaysLeft } from "~/lib/format"
+import { visiblePrayers } from "~/lib/visible-prayers"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { Button } from "~/components/ui/button"
@@ -49,6 +50,7 @@ export default function Log() {
   const [dayLogOpen, setDayLogOpen] = useState(false)
 
   const todayDone = todayLog.data
+  const shownPrayers = visiblePrayers(PRAYERS, prayers.data, todayDone)
 
   const prayerRemaining = prayers.data?.reduce((s, r) => s + r.remaining, 0) ?? 0
   const fastingRemaining = fasting.data?.displayRemaining ?? 0
@@ -98,7 +100,10 @@ export default function Log() {
       </div>
 
       <div className="rounded-xl border border-border bg-card px-4">
-        {PRAYERS.map((p) => (
+        {shownPrayers.length === 0 && (
+          <p className="py-4 text-center text-sm text-muted-foreground">{t("log.allPrayersPaidOff")}</p>
+        )}
+        {shownPrayers.map((p) => (
           <PrayerCard
             key={p}
             prayer={p}

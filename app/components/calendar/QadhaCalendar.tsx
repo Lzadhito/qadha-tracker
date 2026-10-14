@@ -2,9 +2,10 @@ import { useState } from "react"
 import { format } from "date-fns"
 import { Calendar } from "~/components/ui/calendar"
 import { useMonthQadha } from "~/lib/queries/use-month-qadha"
+import { countByDay } from "~/lib/month-qadha"
 import { DayEntriesSheet } from "./DayEntriesSheet"
 
-// Month view with a dot on every day that has a qadha. Tapping a dotted day lists that day.
+// Month view with a dot per qadha done each day (a number past 5). Tapping a dotted day lists that day.
 export function QadhaCalendar() {
   const [month, setMonth] = useState(() => new Date())
   const [openDay, setOpenDay] = useState<string | null>(null)
@@ -21,6 +22,7 @@ export function QadhaCalendar() {
         month={month}
         onMonthChange={setMonth}
         modifiers={{ qadha: marked }}
+        counts={countByDay(days)}
         onDayClick={(date) => {
           const key = format(date, "yyyy-MM-dd")
           if (days.has(key)) setOpenDay(key)
