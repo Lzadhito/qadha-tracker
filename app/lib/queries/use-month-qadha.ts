@@ -18,7 +18,7 @@ async function fetchMonth(monthKey: string): Promise<QadhaEntry[]> {
 
   const prayers = await supabase
     .from("prayer_ledger")
-    .select("id, prayer, amount, logged_at")
+    .select("id, prayer, anchor, amount, logged_at")
     .eq("user_id", uid)
     .eq("entry_type", "qadha")
     .gte("logged_at", start)
@@ -41,6 +41,7 @@ async function fetchMonth(monthKey: string): Promise<QadhaEntry[]> {
       id: r.id as string,
       obligation: "prayer" as const,
       prayer: r.prayer as Prayer,
+      anchor: r.anchor as Prayer | null,
       entry_type: "qadha" as const,
       amount: Number(r.amount),
       logged_at: r.logged_at as string,

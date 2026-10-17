@@ -24,7 +24,7 @@ export function useHistory(
           : await (async () => {
               let q = supabase
                 .from("prayer_ledger")
-                .select("id, prayer, entry_type, amount, logged_at")
+                .select("id, prayer, anchor, entry_type, amount, logged_at")
                 .neq("entry_type", "baseline")
                 .order("logged_at", { ascending: false })
                 .range(from, to)
@@ -70,7 +70,7 @@ export function useHistoryEntry(id: string, obligation: "prayer" | "fasting") {
       if (obligation === "prayer") {
         const { data, error } = await supabase
           .from("prayer_ledger")
-          .select("id, prayer, entry_type, amount, logged_at")
+          .select("id, prayer, anchor, entry_type, amount, logged_at")
           .eq("id", id)
           .single()
         if (error) throw error

@@ -64,9 +64,10 @@
     "selectDates": "Select date(s) above",
     "logFor": "Log for {{date}}",
     "logRange": "Log {{from}} – {{to}} ({{count}} days)",
-    "logged": "{{prayer}} logged",
     "pickDate": "Pick a date",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "loggedAfter": "{{prayer}} logged · after {{anchor}}",
+    "todayCount": "Today ×{{count}}"
   },
   "fastingCard": {
     "label": "Fasting",
@@ -108,7 +109,8 @@
     "fastingType": "Fasting",
     "deleteEntry": "Delete entry",
     "deleteConfirm": "Delete this entry?",
-    "deleteDescription": "Remaining count adjusts accordingly. Cannot be undone."
+    "deleteDescription": "Remaining count adjusts accordingly. Cannot be undone.",
+    "afterAnchor": "after {{anchor}}"
   },
   "settings": {
     "title": "Settings",
@@ -244,15 +246,19 @@
     "otherDate": "Other date",
     "checking": "Checking logged prayers…",
     "pick": "Prayers you made up on {{date}}",
-    "selectAll": "Select all remaining",
     "save_one": "Save {{count}} prayer",
     "save_other": "Save {{count}} prayers",
     "pickRange": "Prayers you made up on {{from}} – {{to}} ({{count}} days)",
-    "saveDays": "Save {{count}} per day × {{days}} days"
+    "saveDays": "Save {{count}} per day × {{days}} days",
+    "afterHint": "made up ↓  after →",
+    "cell": "{{prayer}} after {{anchor}}"
   },
   "calendar": {
     "hasQadha": "qadha done",
     "empty": "No qadha on this day.",
     "viewHistory": "View history"
+  },
+  "anchor": {
+    "label": "Doing qadha after:"
   }
 }

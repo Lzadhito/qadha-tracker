@@ -11,12 +11,14 @@ import type { Prayer } from "~/lib/queries/use-remaining"
 
 interface PrayerLogSheetProps {
   prayer: Prayer
+  // only the Today button (= now) is anchored; past days and ranges are logged without one
+  anchor: Prayer
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 // Lazy-loaded (calendar + dialog) and shared by all prayer cards.
-export function PrayerLogSheet({ prayer, open, onOpenChange }: PrayerLogSheetProps) {
+export function PrayerLogSheet({ prayer, anchor, open, onOpenChange }: PrayerLogSheetProps) {
   const { t } = useTranslation()
   const [range, setRange] = useState<DateRange | undefined>()
   const prayerName = t(`prayers.${prayer}`)
@@ -30,7 +32,7 @@ export function PrayerLogSheet({ prayer, open, onOpenChange }: PrayerLogSheetPro
     setRange(undefined)
   }
 
-  const logQadha = (dates?: DateRange, dateKey?: string) => {
+  const logQadha = (dates?: DateRange, dateKey?: string, withAnchor?: boolean) => {
     let loggedDates: string[] | undefined
     if (dateKey) {
       loggedDates = [wibNoonIso(dateKey)]
@@ -38,7 +40,7 @@ export function PrayerLogSheet({ prayer, open, onOpenChange }: PrayerLogSheetPro
       const dayList = eachDayOfInterval({ start: dates.from, end: dates.to ?? dates.from })
       loggedDates = dayList.map((d) => wibNoonIso(format(d, "yyyy-MM-dd")))
     }
-    logPrayer(prayer, loggedDates)
+    logPrayer(prayer, loggedDates, withAnchor ? anchor : undefined)
     close()
   }
 
@@ -61,7 +63,7 @@ export function PrayerLogSheet({ prayer, open, onOpenChange }: PrayerLogSheetPro
             {t("prayerCard.selectOrDrag")}
           </p>
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={() => logQadha()}>
+            <Button className="flex-1" onClick={() => logQadha(undefined, undefined, true)}>
               {t("prayerCard.today")}
             </Button>
             <Button variant="secondary" className="flex-1" onClick={() => logQadha(undefined, wibYesterdayKey())}>

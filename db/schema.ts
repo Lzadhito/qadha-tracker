@@ -77,6 +77,7 @@ export const prayerLedger = pgTable(
     prayer: text("prayer").notNull(),
     entryType: text("entry_type").notNull(),
     amount: integer("amount").notNull(),
+    anchor: text("anchor"),
     sourcePhaseId: uuid("source_phase_id"),
     loggedAt: timestamp("logged_at", { withTimezone: true })
       .notNull()
@@ -97,6 +98,10 @@ export const prayerLedger = pgTable(
     prayerCheck: check(
       "prayer_check",
       sql`${table.prayer} in ('subuh','zuhur','asar','maghrib','isya')`
+    ),
+    anchorCheck: check(
+      "prayer_anchor_check",
+      sql`${table.anchor} is null or ${table.anchor} in ('subuh','zuhur','asar','maghrib','isya')`
     ),
     entryTypeCheck: check(
       "prayer_entry_type_check",
