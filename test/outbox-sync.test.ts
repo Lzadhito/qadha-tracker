@@ -70,15 +70,16 @@ describe("outbox sync", () => {
     expect(JSON.parse(localStorage.getItem("qadha:outbox")!)).toHaveLength(1)
   })
 
-  it("logs exactly the chosen prayers, once each, on the given day", async () => {
+  it("logs one row per ticked cell, carrying its anchor, on the given day", async () => {
     const m = await load()
     handler.current = () => new Promise(() => {}) as never
-    m.logPrayers(["zuhur", "asar"], ["2026-06-06T05:00:00.000Z"])
+    m.logAnchored([{ prayer: "zuhur", anchor: "subuh" }, { prayer: "zuhur", anchor: "maghrib" }, { prayer: "asar" }], ["2026-06-06T05:00:00.000Z"])
     const [op] = m.getOps()
     const rows = op.kind === "insert" ? op.rows : []
-    expect(rows.map((r) => r.prayer)).toEqual(["zuhur", "asar"])
+    expect(rows.map((r) => [r.prayer, r.anchor])).toEqual([["zuhur", "subuh"], ["zuhur", "maghrib"], ["asar", undefined]])
+    expect(rows[2]).not.toHaveProperty("anchor")
     expect(rows.every((r) => r.logged_at === "2026-06-06T05:00:00.000Z")).toBe(true)
-    m.logPrayers([])
+    m.logAnchored([])
     expect(m.getOps()).toHaveLength(1)
   })
 
@@ -123,7 +124,7 @@ describe("outbox sync", () => {
   it("undo of a log that never synced cancels it locally", async () => {
     const m = await load()
     handler.current = () => ({ error: { code: "", message: "offline" } })
-    m.logPrayers(m.PRAYERS)
+    m.logAnchored(m.PRAYERS.map((prayer) => ({ prayer })))
     await vi.waitFor(() => expect(console.warn).toHaveBeenCalled())
     fake.requests.length = 0
 
@@ -159,9 +160,13 @@ describe("pending ops overlay", () => {
     const m = await load()
     handler.current = () => new Promise(() => {}) as never
     m.logPrayer("subuh")
-    const today = new Set<import("~/lib/queries/use-remaining").Prayer>()
-    for (const op of m.getOps()) m.applyToDaySet(today, op, m.wibDateStr())
-    expect([...today]).toEqual(["subuh"])
+    m.logPrayer("subuh", undefined, "maghrib")
+    const today: import("~/lib/outbox").DayEntry[] = []
+    for (const op of m.getOps()) m.applyToDayLog(today, op, m.wibDateStr())
+    expect(today).toEqual([{ prayer: "subuh", anchor: null }, { prayer: "subuh", anchor: "maghrib" }])
+    // an undo removes the latest entry of that prayer, not the first
+    m.applyToDayLog(today, { id: "u", uid: UID, kind: "undo", prayer: "subuh", dateKey: m.wibDateStr(), targetId: "x" }, m.wibDateStr())
+    expect(today).toEqual([{ prayer: "subuh", anchor: null }])
     expect(m.prayerDeltas(m.getOps()[0])).toEqual({ subuh: -1 })
   })
 })

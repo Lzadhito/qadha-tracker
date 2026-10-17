@@ -1,27 +1,28 @@
-import { useState } from "react"
+import { Fragment, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { eachDayOfInterval, format } from "date-fns"
 import { Check } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Calendar } from "~/components/ui/calendar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
-import { logPrayers } from "~/lib/log-actions"
-import { PRAYERS, getRemainingPrayers, useDatePrayerLog, type Prayer } from "~/lib/queries/use-remaining"
+import { logAnchored } from "~/lib/log-actions"
+import type { DayEntry } from "~/lib/outbox"
+import { PRAYERS, loggedCells, useDatePrayerLog, type Prayer } from "~/lib/queries/use-remaining"
 import { wibDateKey, wibNoonIso, wibYesterdayKey } from "~/lib/wib"
 
 interface DayLogSheetProps {
   open: boolean
   onOpenChange: (v: boolean) => void
   // Today's log comes from the always-fresh cache, so today works offline without a fetch.
-  todayDone: Set<Prayer>
+  todayDone: DayEntry[]
 }
 
-// Day(s) first, prayers second: "yesterday I did Dhuhr and Asr", or all five over a whole range
-// of days, in one sheet and one save.
+// Day(s) first, then a grid of prayer made up x prayer it was done after: "Fajr after Fajr, Dhuhr and
+// Maghrib yesterday", or the same cells over a whole range of days, in one sheet and one save.
 export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps) {
   const { t } = useTranslation()
   const [range, setRange] = useState(() => ({ from: wibYesterdayKey(), to: wibYesterdayKey() }))
-  const [selected, setSelected] = useState<Set<Prayer>>(new Set())
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const [showCalendar, setShowCalendar] = useState(false)
 
   const todayKey = wibDateKey()
@@ -31,21 +32,21 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
     (day) => format(day, "yyyy-MM-dd")
   )
   const multiDay = dayKeys.length > 1
-  // Only a single day can show what is already logged; over a range every selected prayer is logged.
+  // Only a single day can show what is already logged; over a range every ticked cell is logged.
   const isToday = !multiDay && range.from === todayKey
   const dateLog = useDatePrayerLog(multiDay || isToday ? null : range.from)
   const loading = !multiDay && !isToday && dateLog.data === undefined
-  const logged = multiDay ? new Set<Prayer>() : isToday ? todayDone : (dateLog.data ?? new Set<Prayer>())
+  const logged = loggedCells(multiDay ? [] : isToday ? todayDone : (dateLog.data ?? []))
 
   const pickDays = (from: string, to = from) => {
     setRange({ from, to })
     setSelected(new Set())
   }
 
-  const toggle = (prayer: Prayer) =>
+  const toggle = (cell: string) =>
     setSelected((prev) => {
       const next = new Set(prev)
-      if (!next.delete(prayer)) next.add(prayer)
+      if (!next.delete(cell)) next.add(cell)
       return next
     })
 
@@ -58,13 +59,18 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
     }
   }
 
+  const ticked = PRAYERS.flatMap((prayer) =>
+    PRAYERS.filter((anchor) => selected.has(`${prayer}:${anchor}`) && !logged.has(`${prayer}:${anchor}`)).map(
+      (anchor) => ({ prayer, anchor })
+    )
+  )
+
   const save = () => {
-    const prayers = PRAYERS.filter((p) => selected.has(p) && !logged.has(p))
-    logPrayers(prayers, isToday ? undefined : dayKeys.map(wibNoonIso))
+    logAnchored(ticked, isToday ? undefined : dayKeys.map(wibNoonIso))
     close(false)
   }
 
-  const count = PRAYERS.filter((p) => selected.has(p) && !logged.has(p)).length
+  const count = ticked.length
 
   return (
     <Sheet open={open} onOpenChange={close}>
@@ -109,34 +115,37 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
                 ? t("dayLog.pickRange", { from: format(new Date(y, m - 1, d), "d MMM"), to: format(new Date(y2, m2 - 1, d2), "d MMM yyyy"), count: dayKeys.length })
                 : t("dayLog.pick", { date: format(new Date(y, m - 1, d), "d MMM yyyy") })}
           </p>
-          <div className="grid grid-cols-5 gap-2">
-            {PRAYERS.map((p) => {
-              const done = logged.has(p)
-              return (
-                <Button
-                  key={p}
-                  size="sm"
-                  variant={selected.has(p) ? "default" : "outline"}
-                  aria-pressed={selected.has(p)}
-                  disabled={loading || done}
-                  className="h-12 flex-col gap-0.5 px-1 text-xs"
-                  onClick={() => toggle(p)}
-                >
-                  {done && <Check className="h-3 w-3" />}
-                  {t(`prayers.${p}`)}
-                </Button>
-              )
-            })}
+          <div className="grid grid-cols-[4rem_repeat(5,1fr)] items-center gap-1.5">
+            <span className="text-[10px] text-muted-foreground leading-tight">{t("dayLog.afterHint")}</span>
+            {PRAYERS.map((anchor) => (
+              <span key={anchor} className="text-center text-[10px] text-muted-foreground">
+                {t(`prayers.${anchor}`)}
+              </span>
+            ))}
+            {PRAYERS.map((prayer) => (
+              <Fragment key={prayer}>
+                <span className="text-xs font-medium">{t(`prayers.${prayer}`)}</span>
+                {PRAYERS.map((anchor) => {
+                  const cell = `${prayer}:${anchor}`
+                  const done = logged.has(cell)
+                  return (
+                    <Button
+                      key={cell}
+                      size="sm"
+                      variant={selected.has(cell) || done ? "default" : "outline"}
+                      aria-pressed={selected.has(cell)}
+                      aria-label={t("dayLog.cell", { prayer: t(`prayers.${prayer}`), anchor: t(`prayers.${anchor}`) })}
+                      disabled={loading || done}
+                      className="h-9 px-0"
+                      onClick={() => toggle(cell)}
+                    >
+                      {(done || selected.has(cell)) && <Check className="h-3.5 w-3.5" />}
+                    </Button>
+                  )
+                })}
+              </Fragment>
+            ))}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full text-xs"
-            disabled={loading}
-            onClick={() => setSelected(new Set(getRemainingPrayers(logged)))}
-          >
-            {t("dayLog.selectAll")}
-          </Button>
           <Button className="w-full" disabled={count === 0} onClick={save}>
             {multiDay ? t("dayLog.saveDays", { count, days: dayKeys.length }) : t("dayLog.save", { count })}
           </Button>

@@ -11,9 +11,18 @@ export interface LedgerRow {
   id: string
   user_id: string
   prayer?: Prayer
+  // The daily prayer this qadha was done with. Left out (not null) when unknown, so an app
+  // talking to a database without the column still works for unanchored logs.
+  anchor?: Prayer
   entry_type: "qadha" | "adjustment"
   amount: number
   logged_at: string
+}
+
+// One qadha on a given day, as the log screen needs it. `anchor` is null for old/unanchored logs.
+export interface DayEntry {
+  prayer: Prayer
+  anchor: Prayer | null
 }
 
 export type Op =
@@ -138,14 +147,16 @@ export function fastingDelta(op: Op): number {
   return op.rows.reduce((sum, row) => sum + row.amount, 0)
 }
 
-// Applies an op to the set of prayers already logged on `dateKey`.
-export function applyToDaySet(done: Set<Prayer>, op: Op, dateKey: string) {
+// Applies an op to the qadha already logged on `dateKey` (oldest first, like the server list).
+export function applyToDayLog(done: DayEntry[], op: Op, dateKey: string) {
   if (op.kind === "undo") {
-    if (op.dateKey === dateKey && op.targetId !== null) done.delete(op.prayer)
+    if (op.dateKey !== dateKey || op.targetId === null) return
+    const last = done.map((e) => e.prayer).lastIndexOf(op.prayer)
+    if (last >= 0) done.splice(last, 1)
     return
   }
   if (op.table !== "prayer_ledger") return
   for (const row of op.rows) {
-    if (row.prayer && isTodayQadha(row, row.prayer, dateKey)) done.add(row.prayer)
+    if (row.prayer && isTodayQadha(row, row.prayer, dateKey)) done.push({ prayer: row.prayer, anchor: row.anchor ?? null })
   }
 }

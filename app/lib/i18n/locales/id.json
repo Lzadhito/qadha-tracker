@@ -65,9 +65,10 @@
     "selectDates": "Pilih tanggal di atas",
     "logFor": "Catat untuk {{date}}",
     "logRange": "Catat {{from}} – {{to}} ({{count}} hari)",
-    "logged": "{{prayer}} tercatat",
     "pickDate": "Pilih tanggal",
-    "yesterday": "Kemarin"
+    "yesterday": "Kemarin",
+    "loggedAfter": "{{prayer}} tercatat · setelah {{anchor}}",
+    "todayCount": "Hari ini ×{{count}}"
   },
   "fastingCard": {
     "label": "Puasa",
@@ -109,7 +110,8 @@
     "fastingType": "Puasa",
     "deleteEntry": "Hapus entri",
     "deleteConfirm": "Hapus entri ini?",
-    "deleteDescription": "Jumlah tersisa akan menyesuaikan. Tidak bisa dibatalkan."
+    "deleteDescription": "Jumlah tersisa akan menyesuaikan. Tidak bisa dibatalkan.",
+    "afterAnchor": "setelah {{anchor}}"
   },
   "settings": {
     "title": "Pengaturan",
@@ -245,15 +247,19 @@
     "otherDate": "Tanggal lain",
     "checking": "Memeriksa salat yang tercatat…",
     "pick": "Salat yang kamu qadha pada {{date}}",
-    "selectAll": "Pilih semua yang tersisa",
     "save_one": "Simpan {{count}} salat",
     "save_other": "Simpan {{count}} salat",
     "pickRange": "Salat yang kamu qadha pada {{from}} – {{to}} ({{count}} hari)",
-    "saveDays": "Simpan {{count}} per hari × {{days}} hari"
+    "saveDays": "Simpan {{count}} per hari × {{days}} hari",
+    "afterHint": "diqadha ↓  setelah →",
+    "cell": "{{prayer}} setelah {{anchor}}"
   },
   "calendar": {
     "hasQadha": "{{count}} qadha",
     "empty": "Tidak ada qadha di hari ini.",
     "viewHistory": "Lihat riwayat"
+  },
+  "anchor": {
+    "label": "Qadha setelah salat:"
   }
 }

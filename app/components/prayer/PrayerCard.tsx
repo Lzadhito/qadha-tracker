@@ -11,18 +11,20 @@ interface PrayerCardProps {
   prayer: Prayer
   // undefined while the first fetch is in flight: logging still works, only the count waits
   remaining: number | undefined
-  loggedToday: boolean
+  // the daily prayer a tap is anchored to, and how many of this prayer are logged today
+  anchor: Prayer
+  todayCount: number
   // opens the date sheet; a plain tap on +Qadha logs today without it
   onPickDate: (prayer: Prayer) => void
 }
 
-export function PrayerCard({ prayer, remaining, loggedToday, onPickDate }: PrayerCardProps) {
+export function PrayerCard({ prayer, remaining, anchor, todayCount, onPickDate }: PrayerCardProps) {
   const { t } = useTranslation()
   const prayerName = t(`prayers.${prayer}`)
 
   const logNow = () => {
-    logPrayer(prayer)
-    toast(t("prayerCard.logged", { prayer: prayerName }), {
+    logPrayer(prayer, undefined, anchor)
+    toast(t("prayerCard.loggedAfter", { prayer: prayerName, anchor: t(`prayers.${anchor}`) }), {
       action: { label: t("common.undo"), onClick: () => undoTodayPrayer(prayer) },
     })
   }
@@ -43,10 +45,10 @@ export function PrayerCard({ prayer, remaining, loggedToday, onPickDate }: Praye
       </div>
 
       <div className="flex items-center gap-2 flex-shrink-0">
-        {loggedToday && (
+        {todayCount > 0 && (
           <span className="flex items-center gap-1 text-xs text-primary font-medium">
             <CheckCircle2 className="h-4 w-4" />
-            {t("prayerCard.today")}
+            {t("prayerCard.todayCount", { count: todayCount })}
             <Button
               size="icon"
               variant="ghost"

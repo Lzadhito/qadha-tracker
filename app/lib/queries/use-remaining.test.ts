@@ -1,56 +1,22 @@
 import { describe, it, expect, vi, afterEach } from "vitest"
-import { PRAYERS, getRemainingPrayers, wibDateStr } from "./use-remaining"
-import type { Prayer } from "./use-remaining"
+import { countByPrayer, loggedCells, wibDateStr } from "./use-remaining"
 
-// ─── getRemainingPrayers ─────────────────────────────────────────────────────
+// ─── day log helpers ──────────────────────────────────────────────────────────
 
-describe("getRemainingPrayers", () => {
-  it("returns all 5 when none done", () => {
-    expect(getRemainingPrayers(new Set())).toEqual([...PRAYERS])
+describe("countByPrayer / loggedCells", () => {
+  const entries = [
+    { prayer: "subuh", anchor: "subuh" },
+    { prayer: "subuh", anchor: "maghrib" },
+    { prayer: "subuh", anchor: null },
+    { prayer: "asar", anchor: "isya" },
+  ] as const
+
+  it("counts every entry of a prayer, anchored or not", () => {
+    expect(countByPrayer(entries)).toEqual({ subuh: 3, zuhur: 0, asar: 1, maghrib: 0, isya: 0 })
   })
 
-  it("returns empty when all 5 done", () => {
-    expect(getRemainingPrayers(new Set(PRAYERS))).toEqual([])
-  })
-
-  it("excludes only the done prayers", () => {
-    const done = new Set<Prayer>(["subuh"])
-    expect(getRemainingPrayers(done)).toEqual(["zuhur", "asar", "maghrib", "isya"])
-  })
-
-  it("preserves order", () => {
-    const done = new Set<Prayer>(["zuhur", "maghrib"])
-    expect(getRemainingPrayers(done)).toEqual(["subuh", "asar", "isya"])
-  })
-
-  it("count: remaining = 5 - done", () => {
-    const done = new Set<Prayer>(["subuh", "zuhur", "asar"])
-    expect(getRemainingPrayers(done)).toHaveLength(2)
-  })
-})
-
-// ─── button visibility ────────────────────────────────────────────────────────
-
-describe("log-remaining button visibility", () => {
-  function shouldShowButton(done: Set<Prayer>): boolean {
-    const remaining = PRAYERS.length - done.size
-    return done.size > 0 && remaining > 0
-  }
-
-  it("hidden when nothing done today", () => {
-    expect(shouldShowButton(new Set())).toBe(false)
-  })
-
-  it("shown after first prayer logged", () => {
-    expect(shouldShowButton(new Set<Prayer>(["subuh"]))).toBe(true)
-  })
-
-  it("shown with 4 done (1 remaining)", () => {
-    expect(shouldShowButton(new Set<Prayer>(["subuh", "zuhur", "asar", "maghrib"]))).toBe(true)
-  })
-
-  it("hidden when all 5 done", () => {
-    expect(shouldShowButton(new Set(PRAYERS))).toBe(false)
+  it("fills a cell only for anchored entries", () => {
+    expect([...loggedCells(entries)].sort()).toEqual(["asar:isya", "subuh:maghrib", "subuh:subuh"])
   })
 })
 

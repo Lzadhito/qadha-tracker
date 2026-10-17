@@ -9,11 +9,14 @@ import {
   usePrayerRemaining,
   useFastingRemaining,
   useTodayPrayerLog,
+  countByPrayer,
   type Prayer,
 } from "~/lib/queries/use-remaining"
 import { formatTodayDate, formatDaysLeft } from "~/lib/format"
 import { visiblePrayers } from "~/lib/visible-prayers"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
+import { AnchorSelector } from "~/components/prayer/AnchorSelector"
+import { useAnchor } from "~/lib/anchor"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
@@ -49,8 +52,10 @@ export default function Log() {
   const [fastingSheetOpen, setFastingSheetOpen] = useState(false)
   const [dayLogOpen, setDayLogOpen] = useState(false)
 
+  const [anchor, setAnchor] = useAnchor()
   const todayDone = todayLog.data
-  const shownPrayers = visiblePrayers(PRAYERS, prayers.data, todayDone)
+  const todayCounts = countByPrayer(todayDone)
+  const shownPrayers = visiblePrayers(PRAYERS, prayers.data, new Set(todayDone.map((e) => e.prayer)))
 
   const prayerRemaining = prayers.data?.reduce((s, r) => s + r.remaining, 0) ?? 0
   const fastingRemaining = fasting.data?.displayRemaining ?? 0
@@ -92,6 +97,8 @@ export default function Log() {
         </div>
       )}
 
+      <AnchorSelector anchor={anchor} onChange={setAnchor} />
+
       {/* Recording never waits on data: only the counts below fill in once loaded. */}
       <div className="flex flex-col gap-2 pb-2">
         <Button size="sm" className="w-full text-xs" onClick={() => setDayLogOpen(true)}>
@@ -108,7 +115,8 @@ export default function Log() {
             key={p}
             prayer={p}
             remaining={prayers.data?.find((r) => r.prayer === p)?.displayRemaining}
-            loggedToday={todayDone.has(p)}
+            anchor={anchor}
+            todayCount={todayCounts[p]}
             onPickDate={openPrayerSheet}
           />
         ))}
@@ -130,7 +138,7 @@ export default function Log() {
       </Button>
 
       <Suspense fallback={null}>
-        <PrayerLogSheet prayer={logPrayer} open={prayerSheetOpen} onOpenChange={setPrayerSheetOpen} />
+        <PrayerLogSheet prayer={logPrayer} anchor={anchor} open={prayerSheetOpen} onOpenChange={setPrayerSheetOpen} />
         <FastingLogSheet open={fastingSheetOpen} onOpenChange={setFastingSheetOpen} />
         <DayLogSheet open={dayLogOpen} onOpenChange={setDayLogOpen} todayDone={todayDone} />
       </Suspense>

@@ -7,6 +7,7 @@ export interface QadhaEntry {
   id: string
   obligation: "prayer" | "fasting"
   prayer?: Prayer
+  anchor?: Prayer | null
   entry_type: "qadha"
   amount: number
   logged_at: string
@@ -31,6 +32,7 @@ export function mergePendingQadha(entries: QadhaEntry[], ops: Op[], monthKey: st
           id: r.id,
           obligation: op.table === "prayer_ledger" ? ("prayer" as const) : ("fasting" as const),
           prayer: r.prayer,
+          anchor: r.anchor ?? null,
           entry_type: "qadha" as const,
           amount: r.amount,
           logged_at: r.logged_at,

@@ -3,13 +3,14 @@ import { useQuery } from "@tanstack/react-query"
 import { getSupabase, readStoredSession } from "~/lib/supabase"
 import { queryClient } from "~/lib/query-client"
 import {
-  applyToDaySet,
+  applyToDayLog,
   fastingDelta,
   getOps,
   getServerOps,
   prayerDeltas,
   removeOp,
   subscribe,
+  type DayEntry,
   type Op,
 } from "~/lib/outbox"
 import { wibDateKey, wibDayRange } from "~/lib/wib"
@@ -47,8 +48,16 @@ export function clearCachedRemaining() {
   localStorage.removeItem(cacheKey("prayer-today"))
 }
 
-export function getRemainingPrayers(done: Set<Prayer>): Prayer[] {
-  return PRAYERS.filter((p) => !done.has(p))
+// How many qadha of each prayer a day's log holds (for the card's "Today ×N").
+export function countByPrayer(entries: readonly DayEntry[]): Record<Prayer, number> {
+  const counts = { subuh: 0, zuhur: 0, asar: 0, maghrib: 0, isya: 0 }
+  for (const e of entries) counts[e.prayer]++
+  return counts
+}
+
+// Grid cells already taken, as "prayer:anchor". Unanchored entries fill no cell.
+export function loggedCells(entries: readonly DayEntry[]): Set<string> {
+  return new Set(entries.filter((e) => e.anchor).map((e) => `${e.prayer}:${e.anchor}`))
 }
 
 export function wibDateStr(): string {
@@ -104,10 +113,10 @@ function withFastingOps(data: FastingRemaining, ops: Op[]): FastingRemaining {
   return { remaining, displayRemaining: Math.max(0, remaining) }
 }
 
-function withDayOps(done: Set<Prayer>, ops: Op[], dateKey: string): Set<Prayer> {
+function withDayOps(done: DayEntry[], ops: Op[], dateKey: string): DayEntry[] {
   if (!ops.length) return done
-  const next = new Set(done)
-  for (const op of ops) applyToDaySet(next, op, dateKey)
+  const next = [...done]
+  for (const op of ops) applyToDayLog(next, op, dateKey)
   return next
 }
 
@@ -134,11 +143,11 @@ export async function commitSyncedOp(op: Op, applied: boolean) {
       queryClient.setQueryData(["fasting-remaining"], next)
       writeCache("fasting-remaining", next)
     }
-    const today = queryClient.getQueryData<Set<Prayer>>(["prayer-today", todayKey])
+    const today = queryClient.getQueryData<DayEntry[]>(["prayer-today", todayKey])
     if (today) {
       const next = withDayOps(today, [op], todayKey)
       queryClient.setQueryData(["prayer-today", todayKey], next)
-      writeCache("prayer-today", { dateKey: todayKey, prayers: [...next] })
+      writeCache("prayer-today", { dateKey: todayKey, entries: next })
     }
   }
   removeOp(op.id)
@@ -179,18 +188,22 @@ export function usePrayerRemaining() {
   return { data, isLoading: query.isLoading }
 }
 
-async function fetchDayLog(dateKey: string): Promise<Prayer[]> {
+async function fetchDayLog(dateKey: string): Promise<DayEntry[]> {
   const { supabase, session } = await requireSession()
   const { start, end } = wibDayRange(dateKey)
   const { data, error } = await supabase
     .from("prayer_ledger")
-    .select("prayer")
+    .select("prayer, anchor")
     .eq("user_id", session.user.id)
     .eq("entry_type", "qadha")
     .gte("logged_at", start)
     .lte("logged_at", end)
+    .order("logged_at", { ascending: true })
   if (error) throw error
-  return (data ?? []).map((r: { prayer: string }) => r.prayer as Prayer)
+  return (data ?? []).map((r: { prayer: string; anchor: string | null }) => ({
+    prayer: r.prayer as Prayer,
+    anchor: r.anchor as Prayer | null,
+  }))
 }
 
 export function useTodayPrayerLog() {
@@ -198,20 +211,20 @@ export function useTodayPrayerLog() {
   const query = useQuery({
     queryKey: ["prayer-today", dateKey],
     initialData: () => {
-      const cached = cachedData<{ dateKey: string; prayers: Prayer[] }>("prayer-today")
-      return cached?.dateKey === dateKey ? new Set(cached.prayers) : undefined
+      const cached = cachedData<{ dateKey: string; entries?: DayEntry[] }>("prayer-today")
+      return cached?.dateKey === dateKey ? cached.entries : undefined
     },
     initialDataUpdatedAt: 0,
     queryFn: async () => {
-      const prayers = await fetchDayLog(dateKey)
-      writeCache("prayer-today", { dateKey, prayers })
-      return new Set(prayers)
+      const entries = await fetchDayLog(dateKey)
+      writeCache("prayer-today", { dateKey, entries })
+      return entries
     },
   })
   const pending = usePendingOps()
   // Pending logs count even before the server answers, so "logged today" is instant.
   const data = useMemo(
-    () => withDayOps(query.data ?? new Set(), pending, dateKey),
+    () => withDayOps(query.data ?? [], pending, dateKey),
     [query.data, pending, dateKey]
   )
   return { data }
@@ -221,7 +234,7 @@ export function useDatePrayerLog(dateKey: string | null) {
   const query = useQuery({
     queryKey: ["prayer-date", dateKey],
     enabled: !!dateKey,
-    queryFn: async () => new Set(await fetchDayLog(dateKey!)),
+    queryFn: () => fetchDayLog(dateKey!),
   })
   const pending = usePendingOps()
   const data = useMemo(

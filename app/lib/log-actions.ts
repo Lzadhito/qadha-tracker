@@ -31,19 +31,30 @@ function record(table: LedgerTable, rows: NewRow[]) {
 // logged_at is stamped now, not by the server, since the sync may run much later.
 const now = () => new Date().toISOString()
 
-function qadhaRows(prayers: readonly Prayer[], loggedDates?: string[]): NewRow[] {
+export interface QadhaCell {
+  prayer: Prayer
+  anchor?: Prayer
+}
+
+function qadhaRows(cells: readonly QadhaCell[], loggedDates?: string[]): NewRow[] {
   return (loggedDates ?? [now()]).flatMap((logged_at) =>
-    prayers.map((prayer) => ({ prayer, entry_type: "qadha" as const, amount: -1, logged_at }))
+    cells.map(({ prayer, anchor }) => ({
+      prayer,
+      ...(anchor && { anchor }),
+      entry_type: "qadha" as const,
+      amount: -1,
+      logged_at,
+    }))
   )
 }
 
-export function logPrayer(prayer: Prayer, loggedDates?: string[]) {
-  record("prayer_ledger", qadhaRows([prayer], loggedDates))
+export function logPrayer(prayer: Prayer, loggedDates?: string[], anchor?: Prayer) {
+  record("prayer_ledger", qadhaRows([{ prayer, anchor }], loggedDates))
 }
 
-// Any subset of prayers, e.g. the ones ticked in the day-first sheet.
-export function logPrayers(prayers: readonly Prayer[], loggedDates?: string[]) {
-  record("prayer_ledger", qadhaRows(prayers, loggedDates))
+// Any set of prayer x anchor cells, e.g. the ones ticked in the day grid.
+export function logAnchored(cells: readonly QadhaCell[], loggedDates?: string[]) {
+  record("prayer_ledger", qadhaRows(cells, loggedDates))
 }
 
 export function undoTodayPrayer(prayer: Prayer) {

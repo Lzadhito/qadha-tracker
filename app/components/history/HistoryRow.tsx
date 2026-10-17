@@ -7,6 +7,7 @@ interface HistoryRowProps {
     id: string
     obligation: "prayer" | "fasting"
     prayer?: string
+    anchor?: string | null
     entry_type: string
     amount: number
     logged_at: string
@@ -30,7 +31,10 @@ export function HistoryRow({ entry }: HistoryRowProps) {
             ? `${prayerLabel(entry.prayer ?? "")} — ${entryLabel(entry.entry_type)}`
             : `${t("history.fastingType")} — ${entryLabel(entry.entry_type)}`}
         </p>
-        <p className="text-xs text-muted-foreground">{formatLedgerDate(entry.logged_at)}</p>
+        <p className="text-xs text-muted-foreground">
+          {formatLedgerDate(entry.logged_at)}
+          {entry.anchor && ` · ${t("history.afterAnchor", { anchor: prayerLabel(entry.anchor) })}`}
+        </p>
       </div>
       <span className={`text-sm font-mono ${entry.amount < 0 ? "text-primary" : "text-foreground/70"}`}>
         {entry.amount > 0 ? "+" : ""}
