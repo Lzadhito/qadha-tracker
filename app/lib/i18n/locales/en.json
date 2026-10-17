@@ -50,7 +50,8 @@
     "adjustRemaining": "Adjust remaining",
     "pendingSync_one": "{{count}} log waiting to sync",
     "pendingSync_other": "{{count}} logs waiting to sync",
-    "logByDay": "Log qadha by day"
+    "logByDay": "Log qadha by day",
+    "allPrayersPaidOff": "All prayer qadha paid off"
   },
   "prayerCard": {
     "remaining": "{{duration}} remaining",
@@ -254,7 +255,7 @@
     "cell": "{{prayer}} after {{anchor}}"
   },
   "calendar": {
-    "hasQadha": "qadha done",
+    "hasQadha": "{{count}} qadha done",
     "empty": "No qadha on this day.",
     "viewHistory": "View history"
   },

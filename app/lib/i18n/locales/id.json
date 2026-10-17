@@ -50,7 +50,8 @@
     "adjustRemaining": "Sesuaikan sisa",
     "pendingSync_one": "{{count}} catatan menunggu sinkron",
     "pendingSync_other": "{{count}} catatan menunggu sinkron",
-    "logByDay": "Catat qadha per hari"
+    "logByDay": "Catat qadha per hari",
+    "allPrayersPaidOff": "Semua qadha shalat sudah lunas"
   },
   "prayerCard": {
     "remaining": "{{duration}} tersisa",
@@ -254,7 +255,7 @@
     "cell": "{{prayer}} setelah {{anchor}}"
   },
   "calendar": {
-    "hasQadha": "ada qadha",
+    "hasQadha": "{{count}} qadha",
     "empty": "Tidak ada qadha di hari ini.",
     "viewHistory": "Lihat riwayat"
   },
