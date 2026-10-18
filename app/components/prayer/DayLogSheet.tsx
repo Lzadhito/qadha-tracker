@@ -84,18 +84,18 @@ export function DayLogSheet({ open, onOpenChange, todayDone, prayer: only }: Day
         <div className="py-4 space-y-3 px-4">
           <div className="flex gap-2">
             <Button
-              variant={!multiDay && range.from === todayKey ? "default" : "outline"}
-              className="flex-1"
-              onClick={() => pickDays(todayKey)}
-            >
-              {t("prayerCard.today")}
-            </Button>
-            <Button
               variant={!multiDay && range.from === wibYesterdayKey() ? "default" : "outline"}
               className="flex-1"
               onClick={() => pickDays(wibYesterdayKey())}
             >
               {t("prayerCard.yesterday")}
+            </Button>
+            <Button
+              variant={!multiDay && range.from === todayKey ? "default" : "outline"}
+              className="flex-1"
+              onClick={() => pickDays(todayKey)}
+            >
+              {t("prayerCard.today")}
             </Button>
             <Button variant="outline" className="flex-1" onClick={() => setShowCalendar((v) => !v)}>
               {t("dayLog.otherDate")}
