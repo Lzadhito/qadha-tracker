@@ -5,24 +5,25 @@ import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
 import { logPrayer, undoTodayPrayer } from "~/lib/log-actions"
 import { formatDaysLeft } from "~/lib/format"
+import { anchorForClock } from "~/lib/anchor"
 import type { Prayer } from "~/lib/queries/use-remaining"
 
 interface PrayerCardProps {
   prayer: Prayer
   // undefined while the first fetch is in flight: logging still works, only the count waits
   remaining: number | undefined
-  // the daily prayer a tap is anchored to, and how many of this prayer are logged today
-  anchor: Prayer
+  // how many of this prayer are logged today
   todayCount: number
-  // opens the date sheet; a plain tap on +Qadha logs today without it
+  // opens the day sheet for this prayer; a plain tap on +Qadha logs today without it
   onPickDate: (prayer: Prayer) => void
 }
 
-export function PrayerCard({ prayer, remaining, anchor, todayCount, onPickDate }: PrayerCardProps) {
+export function PrayerCard({ prayer, remaining, todayCount, onPickDate }: PrayerCardProps) {
   const { t } = useTranslation()
   const prayerName = t(`prayers.${prayer}`)
 
   const logNow = () => {
+    const anchor = anchorForClock(new Date())
     logPrayer(prayer, undefined, anchor)
     toast(t("prayerCard.loggedAfter", { prayer: prayerName, anchor: t(`prayers.${anchor}`) }), {
       action: { label: t("common.undo"), onClick: () => undoTodayPrayer(prayer) },

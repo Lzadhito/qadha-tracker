@@ -59,12 +59,6 @@
     "today": "Today",
     "undoTitle": "Undo today's log",
     "qadha": "+Qadha",
-    "whenDidYou": "When did you qadha {{prayer}}?",
-    "selectOrDrag": "Select a single day or drag to pick a range.",
-    "orChooseDates": "or choose date(s)",
-    "selectDates": "Select date(s) above",
-    "logFor": "Log for {{date}}",
-    "logRange": "Log {{from}} – {{to}} ({{count}} days)",
     "pickDate": "Pick a date",
     "yesterday": "Yesterday",
     "loggedAfter": "{{prayer}} logged · after {{anchor}}",
@@ -244,6 +238,7 @@
   },
   "dayLog": {
     "title": "Log qadha by day",
+    "titleOne": "Log {{prayer}} by day",
     "otherDate": "Other date",
     "checking": "Checking logged prayers…",
     "pick": "Prayers you made up on {{date}}",
@@ -258,8 +253,5 @@
     "hasQadha": "{{count}} qadha done",
     "empty": "No qadha on this day.",
     "viewHistory": "View history"
-  },
-  "anchor": {
-    "label": "Doing qadha after:"
   }
 }

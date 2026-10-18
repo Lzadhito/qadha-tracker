@@ -15,11 +15,13 @@ interface DayLogSheetProps {
   onOpenChange: (v: boolean) => void
   // Today's log comes from the always-fresh cache, so today works offline without a fetch.
   todayDone: DayEntry[]
+  // Limit the sheet to one prayer (opened from that prayer's card); omit for all five.
+  prayer?: Prayer
 }
 
 // Day(s) first, then a grid of prayer made up x prayer it was done after: "Fajr after Fajr, Dhuhr and
 // Maghrib yesterday", or the same cells over a whole range of days, in one sheet and one save.
-export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps) {
+export function DayLogSheet({ open, onOpenChange, todayDone, prayer: only }: DayLogSheetProps) {
   const { t } = useTranslation()
   const [range, setRange] = useState(() => ({ from: wibYesterdayKey(), to: wibYesterdayKey() }))
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -59,7 +61,8 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
     }
   }
 
-  const ticked = PRAYERS.flatMap((prayer) =>
+  const rows = only ? [only] : PRAYERS
+  const ticked = rows.flatMap((prayer) =>
     PRAYERS.filter((anchor) => selected.has(`${prayer}:${anchor}`) && !logged.has(`${prayer}:${anchor}`)).map(
       (anchor) => ({ prayer, anchor })
     )
@@ -76,7 +79,7 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
     <Sheet open={open} onOpenChange={close}>
       <SheetContent side="bottom">
         <SheetHeader>
-          <SheetTitle>{t("dayLog.title")}</SheetTitle>
+          <SheetTitle>{only ? t("dayLog.titleOne", { prayer: t(`prayers.${only}`) }) : t("dayLog.title")}</SheetTitle>
         </SheetHeader>
         <div className="py-4 space-y-3 px-4">
           <div className="flex gap-2">
@@ -122,7 +125,7 @@ export function DayLogSheet({ open, onOpenChange, todayDone }: DayLogSheetProps)
                 {t(`prayers.${anchor}`)}
               </span>
             ))}
-            {PRAYERS.map((prayer) => (
+            {rows.map((prayer) => (
               <Fragment key={prayer}>
                 <span className="text-xs font-medium">{t(`prayers.${prayer}`)}</span>
                 {PRAYERS.map((anchor) => {

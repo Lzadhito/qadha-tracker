@@ -59,12 +59,6 @@
     "today": "Hari ini",
     "undoTitle": "Batalkan catatan hari ini",
     "qadha": "+Qadha",
-    "whenDidYou": "Kapan kamu meng-qadha {{prayer}}?",
-    "selectOrDrag": "Pilih satu hari atau geser untuk memilih rentang.",
-    "orChooseDates": "atau pilih tanggal",
-    "selectDates": "Pilih tanggal di atas",
-    "logFor": "Catat untuk {{date}}",
-    "logRange": "Catat {{from}} – {{to}} ({{count}} hari)",
     "pickDate": "Pilih tanggal",
     "yesterday": "Kemarin",
     "loggedAfter": "{{prayer}} tercatat · setelah {{anchor}}",
@@ -244,6 +238,7 @@
   },
   "dayLog": {
     "title": "Catat qadha per hari",
+    "titleOne": "Catat {{prayer}} per hari",
     "otherDate": "Tanggal lain",
     "checking": "Memeriksa salat yang tercatat…",
     "pick": "Salat yang kamu qadha pada {{date}}",
@@ -258,8 +253,5 @@
     "hasQadha": "{{count}} qadha",
     "empty": "Tidak ada qadha di hari ini.",
     "viewHistory": "Lihat riwayat"
-  },
-  "anchor": {
-    "label": "Qadha setelah salat:"
   }
 }

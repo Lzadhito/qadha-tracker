@@ -15,8 +15,6 @@ import {
 import { formatTodayDate, formatDaysLeft } from "~/lib/format"
 import { visiblePrayers } from "~/lib/visible-prayers"
 import { PrayerCard } from "~/components/prayer/PrayerCard"
-import { AnchorSelector } from "~/components/prayer/AnchorSelector"
-import { useAnchor } from "~/lib/anchor"
 import { FastingCard } from "~/components/fasting/FastingCard"
 import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
@@ -24,9 +22,6 @@ import { Separator } from "~/components/ui/separator"
 
 // Sheets pull in the dialog, calendar and date-fns. They render (closed) on mount, which starts
 // their download right after first paint instead of blocking it.
-const PrayerLogSheet = lazy(() =>
-  import("~/components/prayer/PrayerLogSheet").then((m) => ({ default: m.PrayerLogSheet }))
-)
 const FastingLogSheet = lazy(() =>
   import("~/components/fasting/FastingLogSheet").then((m) => ({ default: m.FastingLogSheet }))
 )
@@ -47,12 +42,11 @@ export default function Log() {
   const fasting = useFastingRemaining()
   const todayLog = useTodayPrayerLog()
   const pendingCount = usePendingCount()
-  const [logPrayer, setLogPrayer] = useState<Prayer>("subuh")
-  const [prayerSheetOpen, setPrayerSheetOpen] = useState(false)
   const [fastingSheetOpen, setFastingSheetOpen] = useState(false)
+  // undefined = all prayers ("Log by day"); a prayer = that card's calendar icon
+  const [dayLogPrayer, setDayLogPrayer] = useState<Prayer | undefined>()
   const [dayLogOpen, setDayLogOpen] = useState(false)
 
-  const [anchor, setAnchor] = useAnchor()
   const todayDone = todayLog.data
   const todayCounts = countByPrayer(todayDone)
   const shownPrayers = visiblePrayers(PRAYERS, prayers.data, new Set(todayDone.map((e) => e.prayer)))
@@ -64,9 +58,9 @@ export default function Log() {
 
   const today = formatTodayDate()
 
-  const openPrayerSheet = (prayer: Prayer) => {
-    setLogPrayer(prayer)
-    setPrayerSheetOpen(true)
+  const openDayLog = (prayer?: Prayer) => {
+    setDayLogPrayer(prayer)
+    setDayLogOpen(true)
   }
 
   return (
@@ -97,11 +91,9 @@ export default function Log() {
         </div>
       )}
 
-      <AnchorSelector anchor={anchor} onChange={setAnchor} />
-
       {/* Recording never waits on data: only the counts below fill in once loaded. */}
       <div className="flex flex-col gap-2 pb-2">
-        <Button size="sm" className="w-full text-xs" onClick={() => setDayLogOpen(true)}>
+        <Button size="sm" className="w-full text-xs" onClick={() => openDayLog()}>
           {t("log.logByDay")}
         </Button>
       </div>
@@ -115,9 +107,8 @@ export default function Log() {
             key={p}
             prayer={p}
             remaining={prayers.data?.find((r) => r.prayer === p)?.displayRemaining}
-            anchor={anchor}
             todayCount={todayCounts[p]}
-            onPickDate={openPrayerSheet}
+            onPickDate={openDayLog}
           />
         ))}
       </div>
@@ -138,9 +129,8 @@ export default function Log() {
       </Button>
 
       <Suspense fallback={null}>
-        <PrayerLogSheet prayer={logPrayer} anchor={anchor} open={prayerSheetOpen} onOpenChange={setPrayerSheetOpen} />
         <FastingLogSheet open={fastingSheetOpen} onOpenChange={setFastingSheetOpen} />
-        <DayLogSheet open={dayLogOpen} onOpenChange={setDayLogOpen} todayDone={todayDone} />
+        <DayLogSheet open={dayLogOpen} onOpenChange={setDayLogOpen} todayDone={todayDone} prayer={dayLogPrayer} />
       </Suspense>
     </div>
   )
